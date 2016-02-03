@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/activity_margin">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/activity_margin">
+
+        <com.arrg.app.ublock.views.uviews.UTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:tag="textsize_title,text_primary"
+            android:text="@string/material_dialogs"
+            android:textStyle="bold" />
+
+        <com.arrg.app.ublock.views.uviews.UTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/background_header_color"
+            android:padding="@dimen/activity_margin"
+            android:tag="textsize_body"
+            android:text="@string/material_dialogs_lic" />
+
+        <com.arrg.app.ublock.views.uviews.UTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
+            android:tag="textsize_title,text_primary"
+            android:text="@string/app_theme_engine"
+            android:textStyle="bold" />
+
+        <com.arrg.app.ublock.views.uviews.UTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/background_header_color"
+            android:padding="@dimen/activity_margin"
+            android:tag="textsize_body"
+            android:text="@string/app_theme_engine_lic" />
+
+        <com.arrg.app.ublock.views.uviews.UTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
+            android:tag="textsize_title,text_primary"
+            android:text="@string/butterknife"
+            android:textStyle="bold" />
+
+        <com.arrg.app.ublock.views.uviews.UTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/background_header_color"
+            android:padding="@dimen/activity_margin"
+            android:tag="textsize_body"
+            android:text="@string/butterknife_lic" />
+
+        <com.arrg.app.ublock.views.uviews.UTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
+            android:tag="textsize_title,text_primary"
+            android:text="@string/android_device_names"
+            android:textStyle="bold" />
+
+        <com.arrg.app.ublock.views.uviews.UTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/background_header_color"
+            android:padding="@dimen/activity_margin"
+            android:tag="textsize_body"
+            android:text="@string/android_device_names_lic" />
+
+        <com.arrg.app.ublock.views.uviews.UTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
+            android:tag="textsize_title,text_primary"
+            android:text="@string/android_view_animations"
+            android:textStyle="bold" />
+
+        <com.arrg.app.ublock.views.uviews.UTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/background_header_color"
+            android:padding="@dimen/activity_margin"
+            android:tag="textsize_body"
+            android:text="@string/android_view_animations_lic" />
+
+        <com.arrg.app.ublock.views.uviews.UTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
+            android:tag="textsize_title,text_primary"
+            android:text="@string/app_intro"
+            android:textStyle="bold" />
+
+        <com.arrg.app.ublock.views.uviews.UTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/background_header_color"
+            android:padding="@dimen/activity_margin"
+            android:tag="textsize_body"
+            android:text="@string/app_intro_lic" />
+
+        <com.arrg.app.ublock.views.uviews.UTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
+            android:tag="textsize_title,text_primary"
+            android:text="@string/recycler_view_item_animators"
+            android:textStyle="bold" />
+
+        <com.arrg.app.ublock.views.uviews.UTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/background_header_color"
+            android:padding="@dimen/activity_margin"
+            android:tag="textsize_body"
+            android:text="@string/recycler_view_item_animators_lic" />
+
+        <com.arrg.app.ublock.views.uviews.UTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
+            android:tag="textsize_title,text_primary"
+            android:text="@string/material_loading_progressBar"
+            android:textStyle="bold" />
+
+        <com.arrg.app.ublock.views.uviews.UTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/background_header_color"
+            android:padding="@dimen/activity_margin"
+            android:tag="textsize_body"
+            android:text="@string/material_loading_progressBar_lic" />
+
+        <com.arrg.app.ublock.views.uviews.UTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
+            android:tag="textsize_title,text_primary"
+            android:text="@string/colours"
+            android:textStyle="bold" />
+
+        <com.arrg.app.ublock.views.uviews.UTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/background_header_color"
+            android:padding="@dimen/activity_margin"
+            android:tag="textsize_body"
+            android:text="@string/colours_lic" />
+
+        <com.arrg.app.ublock.views.uviews.UTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
+            android:tag="textsize_title,text_primary"
+            android:text="@string/floating_action_button"
+            android:textStyle="bold" />
+
+        <com.arrg.app.ublock.views.uviews.UTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/background_header_color"
+            android:padding="@dimen/activity_margin"
+            android:tag="textsize_body"
+            android:text="@string/floating_action_button_lic" />
+
+        <com.arrg.app.ublock.views.uviews.UTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
+            android:tag="textsize_title,text_primary"
+            android:text="@string/simple_crop_view"
+            android:textStyle="bold" />
+
+        <com.arrg.app.ublock.views.uviews.UTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/background_header_color"
+            android:padding="@dimen/activity_margin"
+            android:tag="textsize_body"
+            android:text="@string/simple_crop_view_lic" />
+
+        <com.arrg.app.ublock.views.uviews.UTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
+            android:tag="textsize_title,text_primary"
+            android:text="@string/image_file_selector"
+            android:textStyle="bold" />
+
+        <com.arrg.app.ublock.views.uviews.UTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/background_header_color"
+            android:padding="@dimen/activity_margin"
+            android:tag="textsize_body"
+            android:text="@string/image_file_selector_lic" />
+
+        <com.arrg.app.ublock.views.uviews.UTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
+            android:tag="textsize_title,text_primary"
+            android:text="@string/google"
+            android:textStyle="bold" />
+
+        <com.arrg.app.ublock.views.uviews.UTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/background_header_color"
+            android:padding="@dimen/activity_margin"
+            android:tag="textsize_body"
+            android:text="@string/google_lic" />
+    </LinearLayout>
+</ScrollView>

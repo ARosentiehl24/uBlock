@@ -1,0 +1,114 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimaryDark"
+    android:orientation="vertical"
+    android:padding="@dimen/activity_margin"
+    android:tag="bg_primary_color_dark"
+    android:weightSum="6"
+    tools:context=".controller.SlideSettingsFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+    <com.arrg.app.ublock.views.uviews.UTextView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="@string/configure_initial_settings"
+        android:textColor="@color/background_light"
+        android:textSize="@dimen/ate_default_textsize_title" />
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_gravity="center"
+        android:layout_margin="5dp"
+        android:layout_weight="2"
+        android:background="?android:attr/selectableItemBackground"
+        android:gravity="center">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:contentDescription="@null"
+            android:src="@drawable/pin_1" />
+
+        <RelativeLayout android:layout_weight="1">
+
+            <com.arrg.app.ublock.views.uviews.UButton
+                android:id="@+id/btn_pin"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/title_activity_pin_settings"
+                android:textColor="@color/background_light"
+                android:textSize="@dimen/ate_default_textsize_headline"
+                android:layout_alignParentBottom="true" />
+        </RelativeLayout>
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_gravity="center"
+        android:layout_margin="5dp"
+        android:layout_weight="2"
+        android:background="?android:attr/selectableItemBackground"
+        android:gravity="center">
+
+        <ViewFlipper
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:autoStart="true"
+            android:flipInterval="1000"
+            android:inAnimation="@android:anim/fade_in"
+            android:outAnimation="@android:anim/fade_out">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:contentDescription="@null"
+                android:src="@drawable/pattern_1" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:contentDescription="@null"
+                android:src="@drawable/pattern_2" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:contentDescription="@null"
+                android:src="@drawable/pattern_3" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:contentDescription="@null"
+                android:src="@drawable/pattern_4" />
+        </ViewFlipper>
+
+        <RelativeLayout android:layout_weight="1">
+
+            <com.arrg.app.ublock.views.uviews.UButton
+                android:id="@+id/btn_pattern"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/title_activity_pattern_settings"
+                android:textColor="@color/background_light"
+                android:textSize="@dimen/ate_default_textsize_headline"
+                android:layout_alignParentBottom="true" />
+        </RelativeLayout>
+    </TableRow>
+</LinearLayout>

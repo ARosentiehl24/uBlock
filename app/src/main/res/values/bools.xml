@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <bool name="lock_apps_after_screen_off">false</bool>
+    <bool name="enable_icon_on_app_drawer">true</bool>
+    <bool name="enable_swipe_on_ublock_screen">true</bool>
+    <bool name="enable_notification_on_status_bar">false</bool>
+    <bool name="is_pattern_visible">true</bool>
+    <bool name="user_fingerprint">false</bool>
+    <bool name="user_voice_command">false</bool>
+    <bool name="use_compat_padding">true</bool>
+    <bool name="show_scroll_bar">true</bool>
+    <bool name="show_dialog_when_new_apps_are_installed">true</bool>
+</resources>

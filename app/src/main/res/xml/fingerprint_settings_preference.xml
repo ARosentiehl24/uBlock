@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <com.arrg.app.ublock.views.uviews.UPreference
+        android:key="@string/number_of_fingerprints_registered_key"
+        android:summary="@string/number_of_fingerprints_registered_description"
+        android:title="@string/number_of_fingerprints_registered" />
+
+    <com.arrg.app.ublock.views.uviews.UPreference
+        android:key="@string/fingerprint_index_to_unlock_key"
+        android:summary="@string/fingerprint_index_to_unlock_description"
+        android:title="@string/fingerprint_index_to_unlock" />
+
+    <com.arrg.app.ublock.views.uviews.UPreference
+        android:key="@string/register_new_fingerprint_key"
+        android:summary="@string/register_new_fingerprint_description"
+        android:title="@string/register_new_fingerprint" />
+</PreferenceScreen>

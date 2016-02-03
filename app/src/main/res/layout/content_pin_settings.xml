@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.arrg.android.app.ublock.views.PinSettingsActivity"
+    tools:showIn="@layout/activity_pin_settings">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.arrg.app.ublock.views.uviews.UEditText
+                android:id="@+id/etPin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="5dp"
+                android:hint="@string/pin"
+                android:imeOptions="actionNext"
+                android:inputType="numberPassword"
+                android:labelFor="@id/etPin"
+                android:maxLines="1"
+                android:textColor="?android:attr/colorPrimary" />
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.arrg.app.ublock.views.uviews.UEditText
+                android:id="@+id/etConfirmPin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="5dp"
+                android:hint="@string/confirm_pin"
+                android:imeOptions="actionDone"
+                android:inputType="numberPassword"
+                android:labelFor="@id/etConfirmPin"
+                android:maxLines="1"
+                android:textColor="?android:attr/colorPrimary" />
+        </android.support.design.widget.TextInputLayout>
+
+        <com.arrg.app.ublock.views.uviews.UCheckBox
+            android:id="@+id/cbPin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:text="@string/show_hide_pin" />
+    </LinearLayout>
+</ScrollView>

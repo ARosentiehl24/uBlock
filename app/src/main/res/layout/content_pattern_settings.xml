@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.arrg.android.app.ublock.views.PatternSettingsActivity"
+    tools:showIn="@layout/activity_pattern_settings">
+
+    <LinearLayout
+        android:id="@+id/ll_buttons"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true">
+
+        <com.arrg.app.ublock.views.uviews.UButton
+            android:id="@+id/b_reset"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:tag="text_primary_color"
+            android:text="@string/reset"
+            android:textColor="?android:attr/colorPrimary" />
+
+        <View
+            android:id="@+id/divider"
+            android:layout_width="1dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:background="?android:attr/colorPrimary"
+            android:tag="bg_primary_color" />
+
+        <com.arrg.app.ublock.views.uviews.UButton
+            android:id="@+id/b_ok"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:tag="text_primary_color"
+            android:text="@android:string/ok"
+            android:textColor="?android:attr/colorPrimary" />
+    </LinearLayout>
+
+    <com.arrg.app.ublock.views.uviews.PatternLockView
+        android:id="@+id/pattern"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/ll_buttons"
+        android:layout_centerInParent="true"
+        app:correct_color="@color/teal_500"
+        app:lock_color="?android:attr/colorPrimaryDark"
+        app:wrong_color="@color/youtube" />
+
+    <com.arrg.app.ublock.views.uviews.UTextView
+        android:id="@+id/tv_pattern_request"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/pattern"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:tag="text_primary_color"
+        android:text="@string/new_pattern_request"
+        android:textColor="?android:attr/colorPrimary"
+        android:textSize="20sp" />
+</RelativeLayout>

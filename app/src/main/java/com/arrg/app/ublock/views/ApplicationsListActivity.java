@@ -1,0 +1,560 @@
+package com.arrg.app.ublock.views;
+
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Point;
+import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Handler;
+import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.util.JsonReader;
+import android.util.JsonToken;
+import android.util.Log;
+import android.view.Display;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.Toast;
+
+import com.afollestad.appthemeengine.ATEActivity;
+import com.afollestad.appthemeengine.Config;
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.arrg.app.ublock.Constants;
+import com.arrg.app.ublock.R;
+import com.arrg.app.ublock.adapters.ApplicationAdapter;
+import com.arrg.app.ublock.model.Applications;
+import com.arrg.app.ublock.util.SharedPreferencesUtil;
+import com.arrg.app.ublock.util.UpdateAppUtil;
+import com.arrg.app.ublock.util.Util;
+import com.arrg.app.ublock.views.uviews.UTextView;
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
+import com.lsjwzh.widget.materialloadingprogressbar.CircleProgressBar;
+import com.sw926.imagefileselector.ImageFileSelector;
+
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import it.gmariotti.recyclerview.adapter.AlphaAnimatorAdapter;
+import it.gmariotti.recyclerview.itemanimator.SlideInOutBottomItemAnimator;
+
+public class ApplicationsListActivity extends ATEActivity implements NavigationView.OnNavigationItemSelectedListener {
+
+    private ApplicationAdapter adapter;
+    public static ApplicationsListActivity listActivity;
+    private Boolean doubleBackToExitPressedOnce = false;
+    private ImageFileSelector mImageFileSelector;
+    private ProgressDialog progress = null;
+    private SharedPreferences lockedAppsPreferences;
+    private SharedPreferences packagesAppsPreferences;
+    private SharedPreferences settingsPreferences;
+    private SharedPreferencesUtil preferencesUtil;
+
+    @Bind(R.id.progressBar)
+    CircleProgressBar progressBar;
+
+    @Bind(R.id.drawer_layout)
+    DrawerLayout drawer;
+
+    @Bind(R.id.nav_view)
+    NavigationView navigationView;
+
+    @Bind(R.id.rv_applications)
+    RecyclerView rvApplications;
+
+    @Bind(R.id.toolbar)
+    Toolbar toolbar;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_applications_list);
+
+        ButterKnife.bind(this);
+        Log.d("LifeCycle", "onCreate");
+
+        setSupportActionBar(toolbar);
+
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
+
+        navigationView.setNavigationItemSelectedListener(this);
+
+        setupSharedPreferences();
+        setupNavigationDrawer(navigationView);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d("LifeCycle", "onStart");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d("LifeCycle", "onResume");
+
+        listActivity = this;
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d("LifeCycle", "onPause");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d("LifeCycle", "onStop");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (adapter != null) {
+            adapter.unRegisterPackageReceiver();
+        }
+
+        listActivity = null;
+
+        System.gc();
+
+        Log.d("LifeCycle", "onDestroy");
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        mImageFileSelector.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            if (doubleBackToExitPressedOnce) {
+                if (SplashScreenActivity.splashScreenActivity != null) {
+                    SplashScreenActivity.splashScreenActivity.finish();
+                }
+
+                ApplicationsListActivity.super.onBackPressed();
+
+                Util.close(this, true);
+
+                return;
+            }
+
+            doubleBackToExitPressedOnce = true;
+            Toast.makeText(this, getString(R.string.please_press_back_again), Toast.LENGTH_SHORT).show();
+
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    doubleBackToExitPressedOnce = false;
+                }
+            }, 2500);
+        }
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+
+        final int id = item.getItemId();
+
+        drawer.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (id == R.id.pin_settings) {
+                    Util.open(ApplicationsListActivity.this, PinSettingsActivity.class, false);
+                } else if (id == R.id.pattern_settings) {
+                    Util.open(ApplicationsListActivity.this, PatternSettingsActivity.class, false);
+                } else if (id == R.id.fingerprint_settings) {
+                    Util.open(ApplicationsListActivity.this, FingerprintPreferenceSettingsActivity.class, false);
+                } else if (id == R.id.more_settings) {
+                    Util.open(ApplicationsListActivity.this, AdvancedPreferenceOptionsActivity.class, false);
+                } else if (id == R.id.background_settings) {
+                    Util.open(ApplicationsListActivity.this, BackgroundSettingsActivity.class, false);
+                } else if (id == R.id.color_settings) {
+                    Util.open(ApplicationsListActivity.this, ThemePreferenceActivity.class, false);
+                } else if (id == R.id.font_settings) {
+                    Util.open(ApplicationsListActivity.this, FontActivity.class, false);
+                } else if (id == R.id.developer_settings) {
+                    Uri webPage = Uri.parse("https://plus.google.com/u/0/108168960305991028461/posts");
+                    Intent webIntent = new Intent(Intent.ACTION_VIEW, webPage);
+                    startActivity(webIntent);
+                } else if (id == R.id.lic_open_source) {
+                    new MaterialDialog.Builder(ApplicationsListActivity.this)
+                            .title(R.string.lic_open_source)
+                            .positiveText(android.R.string.ok)
+                            .typeface(Util.getTypeface(ApplicationsListActivity.this, preferencesUtil, settingsPreferences), Util.getTypeface(ApplicationsListActivity.this, preferencesUtil, settingsPreferences))
+                            .customView(R.layout.lic_open_source, true)
+                            .build()
+                            .show();
+                } else if (id == R.id.exit) {
+                    SplashScreenActivity.splashScreenActivity.finish();
+
+                    Util.closeInverse(ApplicationsListActivity.this, true);
+                } else if (id == R.id.update_settings) {
+                    new CheckForUpdateTask(progress).execute();
+                }
+            }
+        }, Constants.DURATIONS_OF_ANIMATIONS);
+
+        return true;
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mImageFileSelector.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        mImageFileSelector.onRestoreInstanceState(savedInstanceState);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        mImageFileSelector.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    public void setupSharedPreferences() {
+        preferencesUtil = new SharedPreferencesUtil(this);
+        lockedAppsPreferences = getSharedPreferences(Constants.LOCKED_APPS_PREFERENCES, Context.MODE_PRIVATE);
+        mImageFileSelector = new ImageFileSelector(ApplicationsListActivity.this);
+        mImageFileSelector.setCallback(new ImageFileSelector.Callback() {
+            @Override
+            public void onSuccess(String chosenFile) {
+                Intent editImageIntent = new Intent(ApplicationsListActivity.this, SetUserPhotoActivity.class);
+
+                Bundle bundle = new Bundle();
+                bundle.putString(getString(R.string.background), chosenFile);
+
+                editImageIntent.putExtras(bundle);
+
+                Util.openInverse(ApplicationsListActivity.this, editImageIntent, true);
+            }
+
+            @Override
+            public void onError() {
+
+            }
+        });
+        packagesAppsPreferences = getSharedPreferences(Constants.PACKAGES_APPS_PREFERENCES, Context.MODE_PRIVATE);
+        settingsPreferences = getSharedPreferences(Constants.SETTINGS_PREFERENCES, Context.MODE_PRIVATE);
+        progress = new ProgressDialog(this);
+
+        new LoadApplications().execute();
+    }
+
+    public void setupNavigationDrawer(NavigationView navigationView) {
+        View header = navigationView.getHeaderView(0);
+        FrameLayout container = ButterKnife.findById(header, R.id.container);
+        UTextView addPhoto = ButterKnife.findById(header, R.id.add_photo);
+        UTextView appVersion = ButterKnife.findById(header, R.id.app_version);
+
+        try {
+            appVersion.setText(String.format(getString(R.string.current_version), getPackageManager().getPackageInfo(getPackageName(), 0).versionName));
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        if (!Util.isSamsungDevice(this) || !Util.isFingerprintEnabled(this)) {
+            navigationView.getMenu().getItem(0).getSubMenu().removeItem(R.id.fingerprint_settings);
+        }
+
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+            if (bundle.getBoolean(getString(R.string.was_open_from_ublock_screen), false)) {
+                drawer.openDrawer(GravityCompat.START);
+            }
+        }
+
+        if (isPictureSelected()) {
+            addPhoto.setVisibility(View.INVISIBLE);
+
+            String chosenPicture = preferencesUtil.getString(settingsPreferences, R.string.user_picture, null);
+
+            Bitmap bitmap = BitmapFactory.decodeFile(chosenPicture);
+            container.setBackground(new BitmapDrawable(getResources(), bitmap));
+        }
+
+        container.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Display display = getWindowManager().getDefaultDisplay();
+                Point size = new Point();
+                display.getSize(size);
+
+                int width = size.x;
+                int height = size.y;
+
+                mImageFileSelector.setQuality(80);
+
+                mImageFileSelector.setOutPutImageSize(width, height);
+
+                new MaterialDialog.Builder(ApplicationsListActivity.this).content("Where you want to get the picture?").positiveText("Gallery").negativeText("Camera")
+                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                preferencesUtil.putValue(settingsPreferences, "open_camera_gallery", true);
+                                mImageFileSelector.selectImage(ApplicationsListActivity.this);
+                            }
+                        })
+                        .onNegative(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                preferencesUtil.putValue(settingsPreferences, "open_camera_gallery", true);
+                                mImageFileSelector.takePhoto(ApplicationsListActivity.this);
+                            }
+                        })
+                        .typeface(Util.getTypeface(ApplicationsListActivity.this, preferencesUtil, settingsPreferences), Util.getTypeface(ApplicationsListActivity.this, preferencesUtil, settingsPreferences))
+                        .build()
+                        .show();
+            }
+        });
+    }
+
+    public boolean isPictureSelected() {
+        return (preferencesUtil.getString(settingsPreferences, R.string.user_picture, null) != null);
+    }
+
+    public ArrayList<Applications> generateData() {
+        ArrayList<Applications> applicationsArrayList = new ArrayList<>();
+        List<ApplicationInfo> installedApplications = checkForLaunchIntent(getPackageManager().getInstalledApplications(PackageManager.GET_META_DATA));
+
+        for (int i = 0; i < installedApplications.size(); i++) {
+            ApplicationInfo packageInfo = installedApplications.get(i);
+
+            if (!packageInfo.loadLabel(getPackageManager()).toString().equals(getString(R.string.app_name))) {
+                applicationsArrayList.add(new Applications(packageInfo.loadIcon(getPackageManager()), packageInfo.loadLabel(getPackageManager()).toString(), packageInfo.packageName));
+            }
+
+            preferencesUtil.putValue(packagesAppsPreferences, packageInfo.packageName, packageInfo.loadLabel(getPackageManager()).toString());
+        }
+        return applicationsArrayList;
+    }
+
+    public List<ApplicationInfo> checkForLaunchIntent(List<ApplicationInfo> list) {
+        ArrayList<ApplicationInfo> applicationInfoArrayList = new ArrayList<>();
+        for (ApplicationInfo info : list) {
+            try {
+                if (getPackageManager().getLaunchIntentForPackage(info.packageName) != null) {
+                    applicationInfoArrayList.add(info);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return applicationInfoArrayList;
+    }
+
+    public void readJSon(InputStream in) throws IOException {
+        JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
+
+        String version = "";
+        String link = "";
+
+        reader.beginObject();
+        while (reader.hasNext()) {
+            String name = reader.nextName();
+            final boolean isNull = reader.peek() == JsonToken.NULL;
+
+            if (name.equals("version") && !isNull) {
+                version = reader.nextString();
+                preferencesUtil.putValue(settingsPreferences, R.string.ublock_version, version);
+            } else if (name.equals("link") && !isNull) {
+                link = reader.nextString();
+                preferencesUtil.putValue(settingsPreferences, R.string.link_of_ublock_update, link);
+            } else {
+                reader.skipValue();
+            }
+        }
+        reader.endObject();
+
+        try {
+            progress.setCancelable(true);
+            progress.dismiss();
+
+            if (!version.equals(getPackageManager().getPackageInfo(getPackageName(), 0).versionName)) {
+                final String url = link;
+
+                new MaterialDialog.Builder(this)
+                        .title(getString(R.string.updated_app_available))
+                        .content(getString(R.string.updated_app_available_message))
+                        .positiveText(android.R.string.yes)
+                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                progress.setMessage(getString(R.string.please_wait_auto_update));
+                                progress.setCancelable(false);
+                                progress.show();
+
+                                new UpdateAppUtil(ApplicationsListActivity.this).execute(url);
+                            }
+                        }).negativeText(android.R.string.no)
+                        .onNegative(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                dialog.dismiss();
+                            }
+                        }).typeface(Util.getTypeface(this, preferencesUtil, settingsPreferences), Util.getTypeface(this, preferencesUtil, settingsPreferences))
+                        .show();
+            } else {
+                Toast.makeText(this, R.string.there_isnt_updated_app_available, Toast.LENGTH_SHORT).show();
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    class CheckForUpdateTask extends AsyncTask<String, String, String> {
+
+        private ProgressDialog progressDialog;
+
+        public CheckForUpdateTask(ProgressDialog progress) {
+            this.progressDialog = progress;
+            this.progressDialog.setMessage(getString(R.string.check_for_update_message));
+            this.progressDialog.setCancelable(false);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            this.progressDialog.show();
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+            int count;
+
+            try {
+                URL url = new URL("https://www.dropbox.com/s/dwevfzb7b79pznv/uBlockUpdate.json?dl=1");
+                URLConnection connection = url.openConnection();
+                connection.connect();
+
+                InputStream input = new BufferedInputStream(url.openStream(), 8192);
+
+                OutputStream output = new FileOutputStream(getFilesDir() + "/uBlockUpdate.json");
+
+                byte data[] = new byte[1024];
+
+                while ((count = input.read(data)) != -1) {
+                    output.write(data, 0, count);
+                }
+
+                output.flush();
+                output.close();
+                input.close();
+            } catch (Exception e) {
+                Log.e("Error: ", e.getMessage());
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            try {
+                InputStream in = new FileInputStream(getFilesDir() + "/uBlockUpdate.json");
+                readJSon(in);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    class LoadApplications extends AsyncTask<String, String, String> {
+
+        private ArrayList<Applications> applicationsArrayList;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressBar.setColorSchemeColors(Config.primaryColor(ApplicationsListActivity.this, null), Config.primaryColorDark(ApplicationsListActivity.this, null));
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+            if (adapter == null) {
+                final Boolean showScrollBar = preferencesUtil.getBoolean(settingsPreferences, R.string.show_scroll_bar, R.bool.show_scroll_bar);
+
+                applicationsArrayList = generateData();
+
+                Collections.sort(applicationsArrayList, new Comparator<Applications>() {
+                    @Override
+                    public int compare(Applications lhs, Applications rhs) {
+                        return lhs.getAppName().compareTo(rhs.getAppName());
+                    }
+                });
+
+                adapter = new ApplicationAdapter(ApplicationsListActivity.this, applicationsArrayList, lockedAppsPreferences, packagesAppsPreferences, settingsPreferences, preferencesUtil);
+                adapter.registerPackageReceiver();
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        AlphaAnimatorAdapter animatorAdapter = new AlphaAnimatorAdapter(adapter, rvApplications);
+                        //rvApplications.addItemDecoration(new DividerItemDecoration(ApplicationsListActivity.this, DividerItemDecoration.VERTICAL_LIST));
+                        rvApplications.setAdapter(animatorAdapter);
+                        rvApplications.setHasFixedSize(true);
+                        rvApplications.setItemAnimator(new SlideInOutBottomItemAnimator(rvApplications));
+                        rvApplications.setLayoutManager(new LinearLayoutManager(ApplicationsListActivity.this));
+                    }
+                });
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            YoYo.with(Techniques.FadeOutUp).duration(Constants.DURATIONS_OF_ANIMATIONS).playOn(progressBar);
+            YoYo.with(Techniques.FadeInUp).duration(Constants.DURATIONS_OF_ANIMATIONS).playOn(rvApplications);
+
+            rvApplications.setVisibility(View.VISIBLE);
+        }
+    }
+}

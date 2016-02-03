@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.arrg.app.ublock.views.BackgroundSettingsActivity">
+
+    <ImageView
+        android:id="@+id/iv_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@null"
+        android:scaleType="centerCrop"
+        android:tag="bg_primary_color_dark" />
+
+    <com.github.clans.fab.FloatingActionMenu
+        android:id="@+id/fab_menu"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="end|bottom"
+        app:menu_backgroundColor="@color/glass_50"
+        app:menu_colorRipple="@color/ripple"
+        app:menu_labels_colorNormal="@color/glass_10"
+        app:menu_labels_colorPressed="@color/glass_10"
+        app:menu_labels_colorRipple="@color/glass_10"
+        fab:menu_colorNormal="?android:attr/colorPrimaryDark"
+        fab:menu_colorPressed="?android:attr/colorPrimary"
+        fab:menu_labels_cornerRadius="2.5dp">
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/fab_current"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_wallpaper"
+            app:fab_colorRipple="@color/ripple"
+            fab:fab_colorNormal="?android:attr/colorPrimaryDark"
+            fab:fab_colorPressed="?android:attr/colorPrimary"
+            fab:fab_label="@string/current_wallpaper"
+            fab:fab_size="mini" />
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/fab_choose"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_search"
+            app:fab_colorRipple="@color/ripple"
+            fab:fab_colorNormal="?android:attr/colorPrimaryDark"
+            fab:fab_colorPressed="?android:attr/colorPrimary"
+            fab:fab_label="@string/choose_background"
+            fab:fab_size="mini" />
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/fab_photo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_menu_camera"
+            app:fab_colorRipple="@color/ripple"
+            fab:fab_colorNormal="?android:attr/colorPrimaryDark"
+            fab:fab_colorPressed="?android:attr/colorPrimary"
+            fab:fab_label="@string/take_photo"
+            fab:fab_size="mini" />
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/fab_reset"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_close"
+            app:fab_colorRipple="@color/ripple"
+            fab:fab_colorNormal="?android:attr/colorPrimaryDark"
+            fab:fab_colorPressed="?android:attr/colorPrimary"
+            fab:fab_label="@string/reset"
+            fab:fab_size="mini" />
+    </com.github.clans.fab.FloatingActionMenu>
+</FrameLayout>

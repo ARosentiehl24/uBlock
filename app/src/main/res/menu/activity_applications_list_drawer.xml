@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:title="@string/security_action_settings">
+        <menu>
+            <item
+                android:id="@+id/fingerprint_settings"
+                android:icon="@drawable/ic_fingerprint"
+                android:title="@string/security_finger_print_settings" />
+            <item
+                android:id="@+id/pattern_settings"
+                android:icon="@drawable/ic_pattern"
+                android:title="@string/security_pattern_settings" />
+            <item
+                android:id="@+id/pin_settings"
+                android:icon="@drawable/ic_lock"
+                android:title="@string/security_pin_settings" />
+            <item
+                android:id="@+id/more_settings"
+                android:icon="@drawable/ic_more"
+                android:title="@string/more_settings" />
+        </menu>
+    </item>
+
+    <item android:title="@string/style_action_settings">
+        <menu>
+            <item
+                android:id="@+id/background_settings"
+                android:icon="@drawable/ic_wallpaper"
+                android:title="@string/style_background_settings" />
+            <item
+                android:id="@+id/color_settings"
+                android:icon="@drawable/ic_format_paint"
+                android:title="@string/style_theme_settings" />
+            <item
+                android:id="@+id/font_settings"
+                android:icon="@drawable/ic_font"
+                android:title="@string/style_font_settings" />
+        </menu>
+    </item>
+
+    <item android:title="@string/more_action_settings">
+        <menu>
+            <item
+                android:id="@+id/update_settings"
+                android:icon="@drawable/ic_system_update"
+                android:title="@string/check_update_settings" />
+            <item
+                android:id="@+id/lic_open_source"
+                android:icon="@drawable/ic_code"
+                android:title="@string/lic_open_source" />
+            <item
+                android:id="@+id/developer_settings"
+                android:icon="@drawable/ic_account_circle"
+                android:title="@string/contact_developer_settings" />
+            <item
+                android:id="@+id/exit"
+                android:icon="@drawable/ic_exit_to_app"
+                android:title="@string/exit" />
+        </menu>
+    </item>
+</menu>

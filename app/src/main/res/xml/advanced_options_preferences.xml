@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <com.arrg.app.ublock.views.uviews.USwitchPreference
+        android:defaultValue="@bool/lock_apps_after_screen_off"
+        android:key="@string/lock_apps_after_screen_off"
+        android:summaryOff="Off"
+        android:summaryOn="On"
+        android:title="@string/lock_apps_after_screen_off_option" />
+
+    <com.arrg.app.ublock.views.uviews.USwitchPreference
+        android:defaultValue="@bool/enable_swipe_on_ublock_screen"
+        android:key="@string/enable_swipe_on_ublock_screen"
+        android:summaryOff="Off"
+        android:summaryOn="On"
+        android:title="@string/enable_swipe_on_ublock_screen_option" />
+
+    <com.arrg.app.ublock.views.uviews.USwitchPreference
+        android:defaultValue="@bool/user_fingerprint"
+        android:key="@string/user_fingerprint"
+        android:summaryOff="Off"
+        android:summaryOn="On"
+        android:title="@string/fingerprint_on_top_option" />
+
+    <com.arrg.app.ublock.views.uviews.USwitchPreference
+        android:defaultValue="@bool/enable_icon_on_app_drawer"
+        android:key="@string/enable_icon_on_app_drawer"
+        android:summaryOff="Off"
+        android:summaryOn="On"
+        android:title="@string/enable_icon_on_app_drawer_option" />
+
+    <com.arrg.app.ublock.views.uviews.USwitchPreference
+        android:defaultValue="@bool/show_dialog_when_new_apps_are_installed"
+        android:key="@string/show_dialog_when_new_apps_are_installed"
+        android:summaryOff="Off"
+        android:summaryOn="On"
+        android:title="@string/show_dialog_when_new_apps_are_installed_option" />
+
+    <com.arrg.app.ublock.views.uviews.USwitchPreference
+        android:defaultValue="@bool/enable_notification_on_status_bar"
+        android:key="@string/enable_notification_on_status_bar"
+        android:summaryOff="Off"
+        android:summaryOn="On"
+        android:title="@string/enable_notification_on_status_bar_option" />
+
+    <com.arrg.app.ublock.views.uviews.USwitchPreference
+        android:defaultValue="@bool/is_pattern_visible"
+        android:key="@string/is_pattern_visible"
+        android:summaryOff="Off"
+        android:summaryOn="On"
+        android:title="@string/is_pattern_visible_option" />
+</PreferenceScreen>
