@@ -18,6 +18,7 @@ import android.os.Vibrator;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -30,8 +31,11 @@ import com.afollestad.appthemeengine.ATEActivity;
 import com.afollestad.appthemeengine.Config;
 import com.arrg.app.ublock.Constants;
 import com.arrg.app.ublock.R;
+import com.arrg.app.ublock.adapters.DotsAdapter;
 import com.arrg.app.ublock.controller.PinButtonClickedListener;
 import com.arrg.app.ublock.controller.PinButtonEnum;
+import com.arrg.app.ublock.controller.UBlockApplication;
+import com.arrg.app.ublock.controller.ULinearLayoutManager;
 import com.arrg.app.ublock.services.UBlockService;
 import com.arrg.app.ublock.util.SharedPreferencesUtil;
 import com.arrg.app.ublock.util.ThemeUtil;
@@ -87,6 +91,9 @@ public class UBlockScreenActivity extends ATEActivity {
 
     @Bind(R.id.pin)
     PinLockView pinLockView;
+
+    @Bind(R.id.rv_dots)
+    RecyclerView recyclerView;
 
     @Bind(R.id.tv_app_name)
     UTextView tvAppName;
@@ -168,12 +175,14 @@ public class UBlockScreenActivity extends ATEActivity {
     private Boolean onReadyIdentify = false;
     private Boolean isNecessaryShowInput = true;
     private Boolean isSwipeEnabled;
+    private DotsAdapter dotsAdapter;
     private GestureDetector gestureDetector;
     private SharedPreferences settingsPreferences;
     private SharedPreferencesUtil preferencesUtil;
     private Spass spass;
     private SpassFingerprint spassFingerprint;
     private String storedPin;
+    private UBlockApplication uBlockApplication;
     private UBlockService services = UBlockService.UBLOCK;
     private Vibrator vibrator;
 
@@ -260,6 +269,15 @@ public class UBlockScreenActivity extends ATEActivity {
 
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
 
+        uBlockApplication = ((UBlockApplication) getApplicationContext()).getInstance();
+
+        ArrayList<ImageView> dots = new ArrayList<>();
+
+        dotsAdapter = new DotsAdapter(this, dots, ContextCompat.getColor(this, R.color.background_light));
+
+        recyclerView.setAdapter(dotsAdapter);
+        recyclerView.setLayoutManager(new ULinearLayoutManager(this, ULinearLayoutManager.HORIZONTAL, false));
+
         setupSharedPreferences();
     }
 
@@ -269,21 +287,14 @@ public class UBlockScreenActivity extends ATEActivity {
 
         spassFingerprint = new SpassFingerprint(UBlockScreenActivity.this);
 
-        etPin.setText("");
-        patternView.clearPattern();
-
-        if (isNecessaryShowInput) {
-            isNecessaryShowInput = false;
-
-            Integer lastMethodUsed = preferencesUtil.getInt(settingsPreferences, R.string.last_unlock_method, vfUnlockMethods.getDisplayedChild());
-            vfUnlockMethods.setDisplayedChild(lastMethodUsed);
-            displayInput(vfUnlockMethods.getCurrentView().getId());
-        }
+        setupInputData();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+
+        restartInputPinData();
 
         isNecessaryShowInput = true;
 
@@ -482,6 +493,8 @@ public class UBlockScreenActivity extends ATEActivity {
                     if (etPin.getText().length() != 0) {
                         etPin.setText(etPin.getText().toString().substring(0, etPin.getText().length() - 1));
                         etPin.setSelection(etPin.length());
+
+                        dotsAdapter.removeDot(dotsAdapter.getItemCount() - 1);
                     }
                 } else if (pinButtonEnum == PinButtonEnum.BUTTON_DONE) {
                     if (etPin.getText().toString().equals(storedPin)) {
@@ -508,6 +521,8 @@ public class UBlockScreenActivity extends ATEActivity {
                 } else {
                     String pinValue = String.valueOf(pinButtonEnum.getButtonValue());
                     etPin.setText(etPin.getText().toString().concat(pinValue));
+
+                    dotsAdapter.addDot(dotsAdapter.getItemCount());
                 }
             }
         });
@@ -599,6 +614,35 @@ public class UBlockScreenActivity extends ATEActivity {
         } catch (UnsupportedOperationException e) {
             log("Fingerprint Service is not supported in the device");
         }
+    }
+
+    public void setupInputData(){
+        ArrayList<ImageView> dots = new ArrayList<>();
+
+        dotsAdapter = new DotsAdapter(this, dots, Config.primaryColorDark(this, null));
+
+        recyclerView.setAdapter(dotsAdapter);
+        recyclerView.setLayoutManager(new ULinearLayoutManager(this, ULinearLayoutManager.HORIZONTAL, false));
+
+        etPin.setText("");
+        isSwipeEnabled = preferencesUtil.getBoolean(settingsPreferences, R.string.enable_swipe_on_ublock_screen, R.bool.enable_swipe_on_ublock_screen);
+        patternView.clearPattern();
+
+
+        if (isNecessaryShowInput) {
+            isNecessaryShowInput = false;
+
+            Integer lastMethodUsed = preferencesUtil.getInt(settingsPreferences, R.string.last_unlock_method, vfUnlockMethods.getDisplayedChild());
+            vfUnlockMethods.setDisplayedChild(lastMethodUsed);
+            displayInput(vfUnlockMethods.getCurrentView().getId());
+        }
+    }
+
+    public void restartInputPinData(){
+        dotsAdapter = null;
+
+        recyclerView.setAdapter(null);
+        recyclerView.setLayoutManager(null);
     }
 
     public void log(String log) {

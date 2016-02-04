@@ -23,6 +23,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
@@ -39,9 +40,11 @@ import com.afollestad.appthemeengine.ATE;
 import com.afollestad.appthemeengine.Config;
 import com.arrg.app.ublock.Constants;
 import com.arrg.app.ublock.R;
+import com.arrg.app.ublock.adapters.DotsAdapter;
 import com.arrg.app.ublock.controller.PinButtonClickedListener;
 import com.arrg.app.ublock.controller.PinButtonEnum;
 import com.arrg.app.ublock.controller.UBlockApplication;
+import com.arrg.app.ublock.controller.ULinearLayoutManager;
 import com.arrg.app.ublock.util.SharedPreferencesUtil;
 import com.arrg.app.ublock.util.ThemeUtil;
 import com.arrg.app.ublock.util.Util;
@@ -70,6 +73,7 @@ public class UBlockScreenService extends Service implements View.OnKeyListener {
     private Boolean openSettings = false;
     private Boolean isNecessaryShowInput = true;
     private Boolean isSwipeEnabled;
+    private DotsAdapter dotsAdapter;
     private GestureDetector gestureDetector;
     private Intent mIntent;
     private SharedPreferences settingsPreferences;
@@ -172,6 +176,9 @@ public class UBlockScreenService extends Service implements View.OnKeyListener {
     @Bind(R.id.pin)
     PinLockView pinLockView;
 
+    @Bind(R.id.rv_dots)
+    RecyclerView recyclerView;
+
     @Bind(R.id.tv_app_name)
     UTextView tvAppName;
 
@@ -245,6 +252,13 @@ public class UBlockScreenService extends Service implements View.OnKeyListener {
         mRootView = inflateRootView();
 
         mWindowManager.addView(mRootView, mLayoutParams);
+
+        ArrayList<ImageView> dots = new ArrayList<>();
+
+        dotsAdapter = new DotsAdapter(this, dots, ContextCompat.getColor(this, R.color.background_light));
+
+        recyclerView.setAdapter(dotsAdapter);
+        recyclerView.setLayoutManager(new ULinearLayoutManager(this, ULinearLayoutManager.HORIZONTAL, false));
 
         setupSharedPreferences();
 
@@ -454,6 +468,8 @@ public class UBlockScreenService extends Service implements View.OnKeyListener {
                     if (etPin.getText().length() != 0) {
                         etPin.setText(etPin.getText().toString().substring(0, etPin.getText().length() - 1));
                         etPin.setSelection(etPin.length());
+
+                        dotsAdapter.removeDot(dotsAdapter.getItemCount() - 1);
                     }
                 } else if (pinButtonEnum == PinButtonEnum.BUTTON_DONE) {
                     if (etPin.getText().toString().equals(storedPin)) {
@@ -484,6 +500,8 @@ public class UBlockScreenService extends Service implements View.OnKeyListener {
                 } else {
                     String pinValue = String.valueOf(pinButtonEnum.getButtonValue());
                     etPin.setText(etPin.getText().toString().concat(pinValue));
+
+                    dotsAdapter.addDot(dotsAdapter.getItemCount());
                 }
             }
         });

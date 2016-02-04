@@ -44,6 +44,7 @@ import com.arrg.app.ublock.util.SharedPreferencesUtil;
 import com.arrg.app.ublock.views.ApplicationsListActivity;
 import com.arrg.app.ublock.views.DialogActivity;
 import com.arrg.app.ublock.views.SplashScreenActivity;
+import com.arrg.app.ublock.views.UBlockScreenActivity;
 import com.arrg.app.ublock.views.UpdateAppActivity;
 
 import java.io.BufferedInputStream;
@@ -190,14 +191,17 @@ public class UBlockService extends Service {
             }
 
             if (appIsLocked(activityOnTop) && lockedPackages.get(activityOnTop)) {
-                    /*Intent uBlockIntent = new Intent(UBlockService.this, UBlockScreenActivity.class);
-                    uBlockIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                if (getResources().getBoolean(R.bool.lock_from_service)) {
+                    if (!isRunning(this, UBlockScreenService.class)) {
+                        Intent uBlockIntent = new Intent(UBlockService.this, UBlockScreenService.class);
+                        uBlockIntent.putExtra(getString(R.string.activityOnTop), activityOnTop);
+                        startService(uBlockIntent);
+                    }
+                } else {
+                    Intent uBlockIntent = new Intent(UBlockService.this, UBlockScreenActivity.class);
+                    uBlockIntent.setFlags(/*Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | */Intent.FLAG_ACTIVITY_NEW_TASK);
                     uBlockIntent.putExtra(getString(R.string.activityOnTop), activityOnTop);
-                    startActivity(uBlockIntent);*/
-                if (!isRunning(this, UBlockScreenService.class)) {
-                    Intent uBlockIntent = new Intent(UBlockService.this, UBlockScreenService.class);
-                    uBlockIntent.putExtra(getString(R.string.activityOnTop), activityOnTop);
-                    startService(uBlockIntent);
+                    startActivity(uBlockIntent);
                 }
             }
 
@@ -566,6 +570,11 @@ public class UBlockService extends Service {
                 } catch (PackageManager.NameNotFoundException e) {
                     e.printStackTrace();
                 }
+            }
+
+            if (intent.getAction().equals(Intent.ACTION_PACKAGE_REMOVED)) {
+                preferencesUtil.deleteValue(lockedAppsPreferences, appPackage);
+                preferencesUtil.deleteValue(packagesAppsPreferences, appPackage);
             }
         }
 
