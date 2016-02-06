@@ -2,6 +2,13 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <com.arrg.app.ublock.views.uviews.USwitchPreference
+        android:defaultValue="@bool/change_background_ublock_screen"
+        android:key="@string/change_background_ublock_screen"
+        android:summaryOff="Off"
+        android:summaryOn="On"
+        android:title="@string/change_background_ublock_screen_option" />
+
+    <com.arrg.app.ublock.views.uviews.USwitchPreference
         android:defaultValue="@bool/lock_apps_after_screen_off"
         android:key="@string/lock_apps_after_screen_off"
         android:summaryOff="Off"
@@ -50,10 +57,4 @@
         android:summaryOn="On"
         android:title="@string/is_pattern_visible_option" />
 
-    <com.arrg.app.ublock.views.uviews.USwitchPreference
-        android:defaultValue="@bool/change_background_ublock_screen"
-        android:key="@string/change_background_ublock_screen"
-        android:summaryOff="Off"
-        android:summaryOn="On"
-        android:title="@string/change_background_ublock_screen_option" />
 </PreferenceScreen>

@@ -59,6 +59,7 @@ import java.util.TimerTask;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import butterknife.OnLongClick;
 import butterknife.OnTextChanged;
 
 public class UBlockScreenActivity extends ATEActivity {
@@ -81,9 +82,6 @@ public class UBlockScreenActivity extends ATEActivity {
     @Bind(R.id.fab_fingerprint)
     FloatingActionButton fabFingerprint;
 
-    @Bind(R.id.fab_settings)
-    FloatingActionButton fabSettings;
-
     @Bind(R.id.iv_app_icon)
     ImageView ivAppIcon;
 
@@ -102,7 +100,7 @@ public class UBlockScreenActivity extends ATEActivity {
     @Bind(R.id.vf_unlock_methods)
     ViewFlipper vfUnlockMethods;
 
-    @OnClick({R.id.fab_fingerprint, R.id.fab_settings})
+    @OnClick({R.id.fab_fingerprint})
     public void OnClick(View id) {
         switch (id.getId()) {
             case R.id.fab_fingerprint:
@@ -112,7 +110,13 @@ public class UBlockScreenActivity extends ATEActivity {
                     displayFingerPrintRecognizerWithIndex();
                 }
                 break;
-            case R.id.fab_settings:
+        }
+    }
+
+    @OnLongClick({R.id.iv_app_icon})
+    public boolean OnLongClick(View id) {
+        switch (id.getId()) {
+            case R.id.iv_app_icon:
                 if (!openSettings) {
                     openSettings = true;
 
@@ -145,6 +149,7 @@ public class UBlockScreenActivity extends ATEActivity {
                 }
                 break;
         }
+        return true;
     }
 
     @OnTextChanged(R.id.et_pin)
@@ -360,15 +365,13 @@ public class UBlockScreenActivity extends ATEActivity {
         if (preferencesUtil.getBoolean(settingsPreferences, R.string.change_background_ublock_screen, false)) {
             Palette.from(((BitmapDrawable)ivAppIcon.getDrawable()).getBitmap()).generate(new Palette.PaletteAsyncListener() {
                 public void onGenerated(Palette palette) {
-                    int color = palette.getVibrantColor(Config.primaryColor(UBlockScreenActivity.this, null));
+                    Integer iconColor = palette.getVibrantColor(Config.primaryColor(UBlockScreenActivity.this, null));
 
-                    fabFingerprint.setBackgroundTintList(ColorStateList.valueOf(color));
+                    fabFingerprint.setBackgroundTintList(ColorStateList.valueOf(iconColor));
 
-                    fabSettings.setBackgroundTintList(ColorStateList.valueOf(color));
+                    getWindow().setBackgroundDrawable(new ColorDrawable(CircleView.shiftColorDown(iconColor)));
 
-                    getWindow().setBackgroundDrawable(new ColorDrawable(CircleView.shiftColorDown(color)));
-
-                    ThemeUtil.applyTheme(color, cvEtPin, cvFingerprint, cvPattern, cvPin);
+                    ThemeUtil.applyTheme(iconColor, cvEtPin, cvFingerprint, cvPattern, cvPin);
                 }
             });
         } else {
@@ -383,10 +386,6 @@ public class UBlockScreenActivity extends ATEActivity {
                 fabFingerprint.setBackgroundTintList(ColorStateList.valueOf(glassColor));
                 fabFingerprint.setElevation(0);
                 fabFingerprint.setTag("");
-
-                fabSettings.setBackgroundTintList(ColorStateList.valueOf(glassColor));
-                fabSettings.setElevation(0);
-                fabSettings.setTag("");
 
                 String chosenWallpaper = preferencesUtil.getString(settingsPreferences, R.string.background, null);
 

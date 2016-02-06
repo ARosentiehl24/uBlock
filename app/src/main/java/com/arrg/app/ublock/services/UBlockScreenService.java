@@ -67,6 +67,7 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import butterknife.OnLongClick;
 import butterknife.OnTextChanged;
 
 public class UBlockScreenService extends Service implements View.OnKeyListener {
@@ -164,9 +165,6 @@ public class UBlockScreenService extends Service implements View.OnKeyListener {
     @Bind(R.id.fab_fingerprint)
     FloatingActionButton fabFingerprint;
 
-    @Bind(R.id.fab_settings)
-    FloatingActionButton fabSettings;
-
     @Bind(R.id.iv_app_icon)
     ImageView ivAppIcon;
 
@@ -188,7 +186,7 @@ public class UBlockScreenService extends Service implements View.OnKeyListener {
     @Bind(R.id.vf_unlock_methods)
     ViewFlipper vfUnlockMethods;
 
-    @OnClick({R.id.fab_fingerprint, R.id.fab_settings})
+    @OnClick({R.id.fab_fingerprint})
     public void OnClick(View id) {
         switch (id.getId()) {
             case R.id.fab_fingerprint:
@@ -198,7 +196,13 @@ public class UBlockScreenService extends Service implements View.OnKeyListener {
                     displayFingerPrintRecognizerWithIndex();
                 }
                 break;
-            case R.id.fab_settings:
+        }
+    }
+
+    @OnLongClick({R.id.iv_app_icon})
+    public boolean OnLongClick(View id) {
+        switch (id.getId()) {
+            case R.id.iv_app_icon:
                 if (!openSettings) {
                     openSettings = true;
 
@@ -215,6 +219,7 @@ public class UBlockScreenService extends Service implements View.OnKeyListener {
                 }
                 break;
         }
+        return true;
     }
 
     @OnTextChanged(R.id.et_pin)
@@ -388,15 +393,13 @@ public class UBlockScreenService extends Service implements View.OnKeyListener {
         if (preferencesUtil.getBoolean(settingsPreferences, R.string.change_background_ublock_screen, false)) {
             Palette.from(((BitmapDrawable) ivAppIcon.getDrawable()).getBitmap()).generate(new Palette.PaletteAsyncListener() {
                 public void onGenerated(Palette palette) {
-                    int color = palette.getVibrantColor(Config.primaryColor(UBlockScreenService.this, null));
+                    Integer iconColor = palette.getVibrantColor(Config.primaryColor(UBlockScreenService.this, null));
 
-                    fabFingerprint.setBackgroundTintList(ColorStateList.valueOf(color));
+                    fabFingerprint.setBackgroundTintList(ColorStateList.valueOf(iconColor));
 
-                    fabSettings.setBackgroundTintList(ColorStateList.valueOf(color));
+                    container.setBackground(new ColorDrawable(CircleView.shiftColorDown(iconColor)));
 
-                    container.setBackground(new ColorDrawable(CircleView.shiftColorDown(color)));
-
-                    ThemeUtil.applyTheme(color, cvEtPin, cvFingerprint, cvPattern, cvPin);
+                    ThemeUtil.applyTheme(iconColor, cvEtPin, cvFingerprint, cvPattern, cvPin);
                 }
             });
         } else {
@@ -411,10 +414,6 @@ public class UBlockScreenService extends Service implements View.OnKeyListener {
                 fabFingerprint.setBackgroundTintList(ColorStateList.valueOf(glassColor));
                 fabFingerprint.setElevation(0);
                 fabFingerprint.setTag("");
-
-                fabSettings.setBackgroundTintList(ColorStateList.valueOf(glassColor));
-                fabSettings.setElevation(0);
-                fabSettings.setTag("");
 
                 String chosenWallpaper = preferencesUtil.getString(settingsPreferences, R.string.background, null);
 
@@ -614,6 +613,45 @@ public class UBlockScreenService extends Service implements View.OnKeyListener {
 
     public void log(String log) {
         Log.d(TAG, log);
+    }
+
+    private enum ServiceState {
+        /**
+         * Service is not bound
+         */
+        NOT_BOUND,
+        /**
+         * We have requested binding, but not yet received it...
+         */
+        BINDING,
+        /**
+         * Service is successfully bound (we can interact with it)
+         */
+        BOUND,
+        /**
+         * Service requesting unbind
+         */
+        UNBINDING
+    }
+
+    private enum ViewState {
+        /**
+         * The view is visible but not yet completely shown
+         */
+        SHOWING,
+        /**
+         * The view has been completely animated and the user is ready to
+         * interact with it
+         */
+        SHOWN,
+        /**
+         * The user has unlocked / pressed back, and the view is animating
+         */
+        HIDING,
+        /**
+         * The view is not visible to the user
+         */
+        HIDDEN
     }
 
     class StartVariablesTask extends AsyncTask<Void, Void, Void> {

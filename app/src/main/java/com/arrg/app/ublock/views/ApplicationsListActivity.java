@@ -197,7 +197,6 @@ public class ApplicationsListActivity extends ATEActivity implements NavigationV
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
 
         final int id = item.getItemId();
@@ -277,6 +276,14 @@ public class ApplicationsListActivity extends ATEActivity implements NavigationV
     }
 
     public void setupNavigationDrawer(NavigationView navigationView) {
+
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+            if (bundle.getBoolean(getString(R.string.was_open_from_ublock_screen))) {
+                drawer.openDrawer(GravityCompat.START);
+            }
+        }
+
         if (!Util.isSamsungDevice(this) || !Util.isFingerprintEnabled(this)) {
             navigationView.getMenu().getItem(0).getSubMenu().removeItem(R.id.fingerprint_settings);
         }
