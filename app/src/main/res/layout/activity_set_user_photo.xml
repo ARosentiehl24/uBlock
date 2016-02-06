@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/container"
     android:layout_width="match_parent"
@@ -13,20 +14,30 @@
         android:contentDescription="@null"
         android:scaleType="centerCrop" />
 
-    <com.isseiaoki.simplecropview.CropImageView xmlns:custom="http://schemas.android.com/apk/res-auto"
+    <com.isseiaoki.simplecropview.CropImageView
         android:id="@+id/crop_imageView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        custom:cropMode="circle"
-        custom:handleColor="@android:color/transparent" />
+        app:cropMode="circle"
+        app:frameColor="@color/background_light"
+        app:guideColor="@color/background_light"
+        app:handleColor="@color/background_light"
+        app:handleShowMode="not_show"
+        app:handleSize="25dp"
+        app:overlayColor="@color/glass_50" />
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/fab_margin"
-        android:src="@drawable/ic_done"
-        android:tag="bg_tint_accent_color" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+        android:background="@color/glass_50">
 
-</FrameLayout>
+        <Button
+            style="?android:attr/buttonBarButtonStyle"
+            android:id="@+id/btn_accept"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/crop_picture"
+            android:textColor="@color/background_light" />
+    </RelativeLayout>
+</RelativeLayout>

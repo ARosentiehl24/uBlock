@@ -5,6 +5,7 @@ import android.content.res.Configuration;
 import android.util.Log;
 
 import com.arrg.app.ublock.R;
+import com.arrg.app.ublock.util.Util;
 import com.samsung.android.sdk.SsdkUnsupportedException;
 import com.samsung.android.sdk.pass.Spass;
 import com.samsung.android.sdk.pass.SpassFingerprint;
@@ -19,7 +20,7 @@ import org.acra.annotation.ReportsCrashes;
  */
 
 @ReportsCrashes(
-        mailTo = "alberto9.24.93@gmail.com",
+        mailTo = "uappssystemservice@gmail.com",
         customReportContent = {
                 ReportField.APP_VERSION_CODE,
                 ReportField.APP_VERSION_NAME,
@@ -148,24 +149,26 @@ public class UBlockApplication extends Application {
     public void init() {
         uBlock = this;
 
-        spass = new Spass();
+        if (Util.isSamsungDevice(this)) {
+            spass = new Spass();
 
-        try {
-            spass.initialize(this);
-        } catch (SsdkUnsupportedException e) {
-            log("Exception: " + e);
-        } catch (UnsupportedOperationException e) {
-            log("Fingerprint Service is not supported in the device");
-        }
+            try {
+                spass.initialize(this);
+            } catch (SsdkUnsupportedException e) {
+                log("Exception: " + e);
+            } catch (UnsupportedOperationException e) {
+                log("Fingerprint Service is not supported in the device");
+            }
 
-        isFeatureEnabled = spass.isFeatureEnabled(Spass.DEVICE_FINGERPRINT);
+            isFeatureEnabled = spass.isFeatureEnabled(Spass.DEVICE_FINGERPRINT);
 
-        if (isFeatureEnabled) {
-            spassFingerprint = new SpassFingerprint(this);
-            log("Fingerprint Service is supported in the device.");
-            log("SDK version : " + spass.getVersionName());
-        } else {
-            log("Fingerprint Service is not supported in the device.");
+            if (isFeatureEnabled) {
+                spassFingerprint = new SpassFingerprint(this);
+                log("Fingerprint Service is supported in the device.");
+                log("SDK version : " + spass.getVersionName());
+            } else {
+                log("Fingerprint Service is not supported in the device.");
+            }
         }
     }
 

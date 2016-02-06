@@ -184,7 +184,7 @@ public class PatternSettingsActivity extends ATEActivity {
                         vibrator.vibrate(Constants.DURATIONS_OF_ANIMATIONS);
 
                         patternView.setDisplayMode(PatternLockView.DisplayMode.Wrong);
-                        YoYo.with(Techniques.Tada).duration(Constants.DURATIONS_OF_ANIMATIONS).playOn(patternView);
+                        YoYo.with(Techniques.Shake).duration(Constants.DURATIONS_OF_ANIMATIONS).playOn(patternView);
                         YoYo.with(Techniques.FadeOut).duration(Constants.DURATIONS_OF_ANIMATIONS).playOn(tvPatternRequest);
                         YoYo.with(Techniques.FadeIn).duration(Constants.DURATIONS_OF_ANIMATIONS).delay(Constants.DURATIONS_OF_ANIMATIONS).playOn(tvPatternRequest);
 

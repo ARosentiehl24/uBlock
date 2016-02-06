@@ -120,7 +120,7 @@ public class BackgroundSettingsActivity extends ATEActivity {
         if (fabMenu.isOpened()) {
             fabMenu.close(true);
         } else {
-            Util.close(this, true);
+            Util.closeInverse(this, true);
         }
     }
 
@@ -258,21 +258,3 @@ public class BackgroundSettingsActivity extends ATEActivity {
         FileUtils.deleteFile(preferencesUtil.getString(settingsPreferences, R.string.background, null));
     }
 }
-
-
-                    /*Log.d("MoveToVaultTask", new File(getActivity().getFilesDir().getAbsolutePath()).getAbsolutePath());
-
-                    for (File file : new File(getActivity().getFilesDir().getAbsolutePath()).listFiles()) {
-                        if (preferencesUtil.exists(settingsPreferences, file.getName())) {
-                            Log.d("MoveToVaultTaskRestore", "Copy: " + file.getName() + " from " + file.getAbsolutePath() + " to " + preferencesUtil.getString(settingsPreferences, file.getName(), null));
-                            Log.d("MoveToVaultTaskRestore", "Delete: " + file.getAbsolutePath());
-                            Log.d("MoveToVaultTaskRestore", "DeleteKey: " + file.getName());
-
-                            FileUtils.copyFile(file.getAbsolutePath(), preferencesUtil.getString(settingsPreferences, file.getName(), null));
-                            FileUtils.deleteFile(file);
-
-                            preferencesUtil.deleteValue(settingsPreferences, file.getName());
-
-                            uFileAdapter.addFile(new UFile(preferencesUtil.getString(settingsPreferences, file.getName(), null)), uFileAdapter.getItemCount());
-                        }
-                    }*/

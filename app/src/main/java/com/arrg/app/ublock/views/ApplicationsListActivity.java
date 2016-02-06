@@ -9,7 +9,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -28,7 +27,8 @@ import android.util.Log;
 import android.view.Display;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afollestad.appthemeengine.ATEActivity;
@@ -39,10 +39,10 @@ import com.arrg.app.ublock.Constants;
 import com.arrg.app.ublock.R;
 import com.arrg.app.ublock.adapters.ApplicationAdapter;
 import com.arrg.app.ublock.model.Applications;
+import com.arrg.app.ublock.util.AppUtils;
 import com.arrg.app.ublock.util.SharedPreferencesUtil;
 import com.arrg.app.ublock.util.UpdateAppUtil;
 import com.arrg.app.ublock.util.Util;
-import com.arrg.app.ublock.views.uviews.UTextView;
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
 import com.lsjwzh.widget.materialloadingprogressbar.CircleProgressBar;
@@ -64,6 +64,7 @@ import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import de.cketti.mailto.EmailIntentBuilder;
 import it.gmariotti.recyclerview.adapter.AlphaAnimatorAdapter;
 import it.gmariotti.recyclerview.itemanimator.SlideInOutBottomItemAnimator;
 
@@ -72,7 +73,7 @@ public class ApplicationsListActivity extends ATEActivity implements NavigationV
     private ApplicationAdapter adapter;
     public static ApplicationsListActivity listActivity;
     private Boolean doubleBackToExitPressedOnce = false;
-    private ImageFileSelector mImageFileSelector;
+    private ImageFileSelector imageFileSelector;
     private ProgressDialog progress = null;
     private SharedPreferences lockedAppsPreferences;
     private SharedPreferences packagesAppsPreferences;
@@ -111,7 +112,6 @@ public class ApplicationsListActivity extends ATEActivity implements NavigationV
         navigationView.setNavigationItemSelectedListener(this);
 
         setupSharedPreferences();
-        setupNavigationDrawer(navigationView);
     }
 
     @Override
@@ -126,6 +126,8 @@ public class ApplicationsListActivity extends ATEActivity implements NavigationV
         Log.d("LifeCycle", "onResume");
 
         listActivity = this;
+
+        setupNavigationDrawer(navigationView);
     }
 
     @Override
@@ -158,7 +160,7 @@ public class ApplicationsListActivity extends ATEActivity implements NavigationV
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        mImageFileSelector.onActivityResult(requestCode, resultCode, data);
+        imageFileSelector.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -235,6 +237,10 @@ public class ApplicationsListActivity extends ATEActivity implements NavigationV
                     Util.closeInverse(ApplicationsListActivity.this, true);
                 } else if (id == R.id.update_settings) {
                     new CheckForUpdateTask(progress).execute();
+                } else if (id == R.id.send_bug_report) {
+                    EmailIntentBuilder.from(ApplicationsListActivity.this)
+                            .to(getString(R.string.support_email))
+                            .start();
                 }
             }
         }, Constants.DURATIONS_OF_ANIMATIONS);
@@ -245,26 +251,38 @@ public class ApplicationsListActivity extends ATEActivity implements NavigationV
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        mImageFileSelector.onSaveInstanceState(outState);
+        imageFileSelector.onSaveInstanceState(outState);
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        mImageFileSelector.onRestoreInstanceState(savedInstanceState);
+        imageFileSelector.onRestoreInstanceState(savedInstanceState);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        mImageFileSelector.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        imageFileSelector.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     public void setupSharedPreferences() {
         preferencesUtil = new SharedPreferencesUtil(this);
         lockedAppsPreferences = getSharedPreferences(Constants.LOCKED_APPS_PREFERENCES, Context.MODE_PRIVATE);
-        mImageFileSelector = new ImageFileSelector(ApplicationsListActivity.this);
-        mImageFileSelector.setCallback(new ImageFileSelector.Callback() {
+        packagesAppsPreferences = getSharedPreferences(Constants.PACKAGES_APPS_PREFERENCES, Context.MODE_PRIVATE);
+        settingsPreferences = getSharedPreferences(Constants.SETTINGS_PREFERENCES, Context.MODE_PRIVATE);
+        progress = new ProgressDialog(this);
+
+        new LoadApplications().execute();
+    }
+
+    public void setupNavigationDrawer(NavigationView navigationView) {
+        if (!Util.isSamsungDevice(this) || !Util.isFingerprintEnabled(this)) {
+            navigationView.getMenu().getItem(0).getSubMenu().removeItem(R.id.fingerprint_settings);
+        }
+
+        imageFileSelector = new ImageFileSelector(ApplicationsListActivity.this);
+        imageFileSelector.setCallback(new ImageFileSelector.Callback() {
             @Override
             public void onSuccess(String chosenFile) {
                 Intent editImageIntent = new Intent(ApplicationsListActivity.this, SetUserPhotoActivity.class);
@@ -274,7 +292,7 @@ public class ApplicationsListActivity extends ATEActivity implements NavigationV
 
                 editImageIntent.putExtras(bundle);
 
-                Util.openInverse(ApplicationsListActivity.this, editImageIntent, true);
+                Util.openInverse(ApplicationsListActivity.this, editImageIntent, false);
             }
 
             @Override
@@ -282,83 +300,57 @@ public class ApplicationsListActivity extends ATEActivity implements NavigationV
 
             }
         });
-        packagesAppsPreferences = getSharedPreferences(Constants.PACKAGES_APPS_PREFERENCES, Context.MODE_PRIVATE);
-        settingsPreferences = getSharedPreferences(Constants.SETTINGS_PREFERENCES, Context.MODE_PRIVATE);
-        progress = new ProgressDialog(this);
 
-        new LoadApplications().execute();
-    }
-
-    public void setupNavigationDrawer(NavigationView navigationView) {
         View header = navigationView.getHeaderView(0);
-        FrameLayout container = ButterKnife.findById(header, R.id.container);
-        UTextView addPhoto = ButterKnife.findById(header, R.id.add_photo);
-        UTextView appVersion = ButterKnife.findById(header, R.id.app_version);
 
-        try {
-            appVersion.setText(String.format(getString(R.string.current_version), getPackageManager().getPackageInfo(getPackageName(), 0).versionName));
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        if (!Util.isSamsungDevice(this) || !Util.isFingerprintEnabled(this)) {
-            navigationView.getMenu().getItem(0).getSubMenu().removeItem(R.id.fingerprint_settings);
-        }
-
-        Bundle bundle = getIntent().getExtras();
-        if (bundle != null) {
-            if (bundle.getBoolean(getString(R.string.was_open_from_ublock_screen), false)) {
-                drawer.openDrawer(GravityCompat.START);
-            }
-        }
-
-        if (isPictureSelected()) {
-            addPhoto.setVisibility(View.INVISIBLE);
-
-            String chosenPicture = preferencesUtil.getString(settingsPreferences, R.string.user_picture, null);
-
-            Bitmap bitmap = BitmapFactory.decodeFile(chosenPicture);
-            container.setBackground(new BitmapDrawable(getResources(), bitmap));
-        }
-
-        container.setOnClickListener(new View.OnClickListener() {
+        ImageView profilePicture = ButterKnife.findById(header, R.id.profile_picture);
+        profilePicture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Display display = getWindowManager().getDefaultDisplay();
                 Point size = new Point();
+
+                Display display = getWindowManager().getDefaultDisplay();
                 display.getSize(size);
 
                 int width = size.x;
                 int height = size.y;
 
-                mImageFileSelector.setQuality(80);
+                imageFileSelector.setQuality(80);
+                imageFileSelector.setOutPutImageSize(width, height);
 
-                mImageFileSelector.setOutPutImageSize(width, height);
-
-                new MaterialDialog.Builder(ApplicationsListActivity.this).content("Where you want to get the picture?").positiveText("Gallery").negativeText("Camera")
+                new MaterialDialog.Builder(ApplicationsListActivity.this)
+                        .content(R.string.picture_source)
+                        .positiveText(R.string.from_gallery)
+                        .negativeText(R.string.from_camera)
                         .onPositive(new MaterialDialog.SingleButtonCallback() {
                             @Override
                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                preferencesUtil.putValue(settingsPreferences, "open_camera_gallery", true);
-                                mImageFileSelector.selectImage(ApplicationsListActivity.this);
+                                imageFileSelector.selectImage(ApplicationsListActivity.this);
                             }
                         })
                         .onNegative(new MaterialDialog.SingleButtonCallback() {
                             @Override
                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                preferencesUtil.putValue(settingsPreferences, "open_camera_gallery", true);
-                                mImageFileSelector.takePhoto(ApplicationsListActivity.this);
+                                imageFileSelector.takePhoto(ApplicationsListActivity.this);
                             }
                         })
-                        .typeface(Util.getTypeface(ApplicationsListActivity.this, preferencesUtil, settingsPreferences), Util.getTypeface(ApplicationsListActivity.this, preferencesUtil, settingsPreferences))
-                        .build()
-                        .show();
+                        .build().show();
             }
         });
+
+        TextView appVersion = ButterKnife.findById(header, R.id.app_version);
+        appVersion.setText(String.format(getString(R.string.current_version), AppUtils.getVerName(this)));
+
+        if (isPictureSelected()) {
+            String chosenPicture = preferencesUtil.getString(settingsPreferences, R.string.user_picture_preference, null);
+
+            Bitmap bitmap = BitmapFactory.decodeFile(chosenPicture);
+            profilePicture.setImageBitmap(bitmap);
+        }
     }
 
     public boolean isPictureSelected() {
-        return (preferencesUtil.getString(settingsPreferences, R.string.user_picture, null) != null);
+        return (preferencesUtil.getString(settingsPreferences, R.string.user_picture_preference, null) != null);
     }
 
     public ArrayList<Applications> generateData() {

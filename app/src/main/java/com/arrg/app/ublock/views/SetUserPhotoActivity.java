@@ -1,15 +1,12 @@
 package com.arrg.app.ublock.views;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
-import android.support.design.widget.FloatingActionButton;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -31,7 +28,6 @@ import butterknife.OnClick;
 
 public class SetUserPhotoActivity extends ATEActivity {
 
-    private Bitmap bitmap;
     private SharedPreferences settingsPreferences;
     private SharedPreferencesUtil preferencesUtil;
     private String chosenFile;
@@ -39,16 +35,13 @@ public class SetUserPhotoActivity extends ATEActivity {
     @Bind(R.id.crop_imageView)
     CropImageView cropImageView;
 
-    @Bind(R.id.fab)
-    FloatingActionButton fab;
-
     @Bind(R.id.iv_background)
     ImageView background;
 
-    @OnClick({R.id.fab})
+    @OnClick({R.id.btn_accept})
     public void OnClick(View id) {
         switch (id.getId()) {
-            case R.id.fab:
+            case R.id.btn_accept:
                 new SaveFileTask().execute();
                 break;
         }
@@ -60,7 +53,13 @@ public class SetUserPhotoActivity extends ATEActivity {
         setContentView(R.layout.activity_set_user_photo);
         ButterKnife.bind(this);
 
-        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        View window = getWindow().getDecorView();
+        window.setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_IMMERSIVE
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
 
         preferencesUtil = new SharedPreferencesUtil(this);
         settingsPreferences = getSharedPreferences(Constants.SETTINGS_PREFERENCES, Context.MODE_PRIVATE);
@@ -69,9 +68,9 @@ public class SetUserPhotoActivity extends ATEActivity {
 
         chosenFile = bundle.getString(getString(R.string.background));
 
-        bitmap = BitmapFactory.decodeFile(chosenFile);
+        Bitmap bitmap = BitmapFactory.decodeFile(chosenFile);
 
-        background.setImageDrawable(new BitmapDrawable(getResources(), BlurEffectUtil.blur(this, bitmap)));
+        background.setImageDrawable(new BitmapDrawable(getResources(), BlurEffectUtil.blur(this, bitmap, 25.f, 0.25f)));
 
         cropImageView.setImageDrawable(new BitmapDrawable(getResources(), bitmap));
     }
@@ -87,14 +86,7 @@ public class SetUserPhotoActivity extends ATEActivity {
     public void onBackPressed() {
         FileUtils.deleteFile(chosenFile);
 
-        Intent applicationListIntent = new Intent(this, ApplicationsListActivity.class);
-
-        Bundle bundle = new Bundle();
-        bundle.putBoolean(getString(R.string.was_open_from_ublock_screen), true);
-
-        applicationListIntent.putExtras(bundle);
-
-        Util.openInverse(this, applicationListIntent, true);
+        Util.closeInverse(this, true);
     }
 
     class SaveFileTask extends AsyncTask<Void, Void, Void> {
@@ -114,21 +106,14 @@ public class SetUserPhotoActivity extends ATEActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    String path = File.separator + getString(R.string.app_name) + File.separator + getString(R.string.media) + File.separator + getString(R.string.wallpaper) + File.separator;
                     String fileName = getString(R.string.user_picture_name);
 
-                    File filepath = Environment.getExternalStorageDirectory();
-
-                    File directory = new File(filepath.getAbsolutePath() + path);
-
-                    File file = new File(directory, fileName);
-
-                    FileUtils.copyFile(chosenFile, file.getAbsolutePath());
+                    File file = new File(getExternalFilesDir(null), fileName);
 
                     FileUtils.deleteFile(chosenFile);
 
-                    if (Util.saveWallpaper(SetUserPhotoActivity.this, cropImageView.getCroppedBitmap(), path, fileName, false)) {
-                        preferencesUtil.putValue(settingsPreferences, R.string.user_picture, file.getAbsolutePath());
+                    if (Util.saveWallpaper(cropImageView.getCroppedBitmap(), file)) {
+                        preferencesUtil.putValue(settingsPreferences, R.string.user_picture_preference, file.getAbsolutePath());
                     }
                 }
             });
@@ -140,14 +125,7 @@ public class SetUserPhotoActivity extends ATEActivity {
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
 
-            Intent applicationListIntent = new Intent(SetUserPhotoActivity.this, ApplicationsListActivity.class);
-
-            Bundle bundle = new Bundle();
-            bundle.putBoolean(getString(R.string.was_open_from_ublock_screen), true);
-
-            applicationListIntent.putExtras(bundle);
-
-            Util.openInverse(SetUserPhotoActivity.this, applicationListIntent, true);
+            Util.closeInverse(SetUserPhotoActivity.this, true);
         }
     }
 }

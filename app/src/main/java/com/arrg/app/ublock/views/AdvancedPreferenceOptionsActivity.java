@@ -58,6 +58,7 @@ public class AdvancedPreferenceOptionsActivity extends ATEActivity {
 
     public static class AdvancedOptionsFragment extends PreferenceFragment implements Preference.OnPreferenceChangeListener {
 
+        private USwitchPreference changeBackgroundUBlockScreen;
         private SharedPreferences settingsPreferences;
         private SharedPreferencesUtil preferencesUtil;
 
@@ -102,6 +103,33 @@ public class AdvancedPreferenceOptionsActivity extends ATEActivity {
                 applicationOnAppDrawer((Boolean) newValue);
             } else if (preference.getKey().equals(getString(R.string.enable_notification_on_status_bar))) {
                 notificationOnStatusBar((Boolean) newValue);
+            } else if (preference.getKey().equals(getString(R.string.change_background_ublock_screen))) {
+                if (((Boolean) newValue)) {
+                    MaterialDialog.Builder builder = new MaterialDialog.Builder(getActivity());
+                    builder.title(android.R.string.dialog_alert_title);
+                    builder.content(R.string.change_background_ublock_screen_message);
+                    builder.cancelable(false);
+                    builder.positiveText(android.R.string.ok);
+                    builder.onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            preferencesUtil.deleteValue(settingsPreferences, R.string.background);
+                        }
+                    });
+                    builder.negativeText(android.R.string.no);
+                    builder.onNegative(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            changeBackgroundUBlockScreen.setChecked(false);
+                            preferencesUtil.putValue(settingsPreferences, R.string.change_background_ublock_screen, false);
+
+                            dialog.setCancelable(true);
+                            dialog.dismiss();
+                        }
+                    });
+                    builder.typeface(Util.getTypeface(getActivity(), preferencesUtil, settingsPreferences), Util.getTypeface(getActivity(), preferencesUtil, settingsPreferences));
+                    builder.show();
+                }
             }
 
             return true;
@@ -143,6 +171,9 @@ public class AdvancedPreferenceOptionsActivity extends ATEActivity {
 
             USwitchPreference isPatternVisible = (USwitchPreference) findPreference(getString(R.string.is_pattern_visible));
             isPatternVisible.setOnPreferenceChangeListener(this);
+
+            changeBackgroundUBlockScreen = (USwitchPreference) findPreference(getString(R.string.change_background_ublock_screen));
+            changeBackgroundUBlockScreen.setOnPreferenceChangeListener(this);
         }
 
         public void applicationOnAppDrawer(boolean isChecked) {

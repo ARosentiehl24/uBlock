@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/container"
     android:layout_width="match_parent"
@@ -24,117 +24,139 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             custom:cropMode="ratio_9_16"
-            custom:handleColor="@android:color/transparent" />
+            custom:handleColor="@android:color/transparent"
+            custom:handleShowMode="not_show"
+            custom:handleSize="25dp"
+            custom:overlayColor="@color/glass_50" />
 
-        <FrameLayout
+        <View
             android:layout_width="match_parent"
-            android:layout_height="75dp">
-
-            <LinearLayout
-                android:id="@+id/background_tools"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/glass_10"
-                android:baselineAligned="false"
-                android:visibility="visible">
-
-                <RelativeLayout
-                    android:id="@+id/rotate"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="?android:attr/selectableItemBackground"
-                    android:padding="5dp">
-
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerInParent="true"
-                        android:clickable="false"
-                        android:contentDescription="@null"
-                        android:src="@drawable/ic_rotate_90_degrees" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentBottom="true"
-                        android:layout_centerHorizontal="true"
-                        android:gravity="center"
-                        android:text="@string/orientation"
-                        android:textColor="@color/background_light"
-                        android:textSize="12.5sp" />
-                </RelativeLayout>
-
-                <RelativeLayout
-                    android:id="@+id/blur"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="?android:attr/selectableItemBackground"
-                    android:padding="5dp">
-
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerInParent="true"
-                        android:clickable="false"
-                        android:contentDescription="@null"
-                        android:src="@drawable/ic_blur_on" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentBottom="true"
-                        android:layout_centerHorizontal="true"
-                        android:gravity="center"
-                        android:text="@string/blur_effect"
-                        android:textColor="@color/background_light"
-                        android:textSize="12.5sp" />
-                </RelativeLayout>
-
-                <RelativeLayout
-                    android:id="@+id/done"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="?android:attr/selectableItemBackground"
-                    android:padding="5dp">
-
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerInParent="true"
-                        android:clickable="false"
-                        android:contentDescription="@null"
-                        android:src="@drawable/ic_done" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentBottom="true"
-                        android:layout_centerHorizontal="true"
-                        android:gravity="center"
-                        android:text="@string/done"
-                        android:textColor="@color/background_light"
-                        android:textSize="12.5sp" />
-                </RelativeLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/blur_effect_intensity"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_margin="5dp"
-                android:background="@color/glass_10"
-                android:visibility="invisible">
-
-                <SeekBar
-                    android:id="@+id/seekBar"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:max="25" />
-            </LinearLayout>
-        </FrameLayout>
+            android:layout_height="75dp" />
     </LinearLayout>
-</FrameLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:id="@+id/background_tools"
+            android:layout_width="match_parent"
+            android:layout_height="75dp"
+            android:layout_alignParentBottom="true"
+            android:background="@color/glass_10"
+            android:baselineAligned="false"
+            android:visibility="visible">
+
+            <RelativeLayout
+                android:id="@+id/rotate"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?android:attr/selectableItemBackground"
+                android:padding="5dp">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:clickable="false"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_rotate_90_degrees" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_centerHorizontal="true"
+                    android:gravity="center"
+                    android:text="@string/orientation"
+                    android:textColor="@color/background_light"
+                    android:textSize="12.5sp" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/blur"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?android:attr/selectableItemBackground"
+                android:padding="5dp">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:clickable="false"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_blur_on" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_centerHorizontal="true"
+                    android:gravity="center"
+                    android:text="@string/blur_effect"
+                    android:textColor="@color/background_light"
+                    android:textSize="12.5sp" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/done"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?android:attr/selectableItemBackground"
+                android:padding="5dp">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:clickable="false"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_done" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_centerHorizontal="true"
+                    android:gravity="center"
+                    android:text="@string/done"
+                    android:textColor="@color/background_light"
+                    android:textSize="12.5sp" />
+            </RelativeLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/blur_effect_radius"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/background_tools"
+            android:layout_margin="5dp"
+            android:background="@color/glass_10"
+            android:visibility="invisible">
+
+            <com.arrg.app.ublock.views.uviews.UTextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:padding="10dp"
+                android:text="@string/blur"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat"
+                android:textColor="@color/background_light" />
+
+            <SeekBar
+                android:id="@+id/seekBar_radius"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="3"
+                android:max="25"
+                android:padding="10dp" />
+        </LinearLayout>
+    </RelativeLayout>
+</RelativeLayout>

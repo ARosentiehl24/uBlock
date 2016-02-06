@@ -10,5 +10,6 @@
     <bool name="use_compat_padding">true</bool>
     <bool name="show_scroll_bar">true</bool>
     <bool name="show_dialog_when_new_apps_are_installed">true</bool>
-    <bool name="lock_from_service">false</bool>
+    <bool name="lock_from_service">true</bool>
+    <bool name="change_background_ublock_screen">false</bool>
 </resources>

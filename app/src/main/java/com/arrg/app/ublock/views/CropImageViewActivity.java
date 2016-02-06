@@ -7,8 +7,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
-import android.util.Log;
+import android.os.Handler;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -27,8 +26,6 @@ import com.daimajia.androidanimations.library.YoYo;
 import com.isseiaoki.simplecropview.CropImageView;
 
 import java.io.File;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -42,23 +39,24 @@ public class CropImageViewActivity extends ATEActivity {
     private SharedPreferencesUtil preferencesUtil;
     private String chosenFile;
 
+    private Runnable hideViewsRunnable = new Runnable() {
+        @Override
+        public void run() {
+            blurEffectRadiusIntensity.setVisibility(View.INVISIBLE);
+        }
+    };
+
     @Bind(R.id.crop_imageView)
     CropImageView cropImageView;
 
     @Bind(R.id.iv_background)
     ImageView background;
 
-    @Bind(R.id.background_tools)
-    LinearLayout backgroundTools;
+    @Bind(R.id.blur_effect_radius)
+    LinearLayout blurEffectRadiusIntensity;
 
-    @Bind(R.id.blur_effect_intensity)
-    LinearLayout blurEffectIntensity;
-
-    @Bind(R.id.seekBar)
-    SeekBar seekBar;
-
-    /*@Bind(R.id.blur_effect_intensity_value)
-    UTextView blurEffectIntensityValue;*/
+    @Bind(R.id.seekBar_radius)
+    SeekBar seekBarRadius;
 
     @OnClick({R.id.rotate, R.id.blur, R.id.done})
     public void onMenuItemClick(View view) {
@@ -92,35 +90,43 @@ public class CropImageViewActivity extends ATEActivity {
 
         bitmap = BitmapFactory.decodeFile(chosenFile);
 
-        background.setImageDrawable(new BitmapDrawable(getResources(), BlurEffectUtil.blur(this, bitmap)));
+        background.setImageDrawable(new BitmapDrawable(getResources(), BlurEffectUtil.blur(this, bitmap, 25.f, 0.25f)));
 
         cropImageView.setImageDrawable(new BitmapDrawable(getResources(), bitmap));
 
-        seekBar.setProgress(0);
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        seekBarRadius.setProgress(0);
+        seekBarRadius.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                Log.d("SeekBar", "Value On Changed: " + progress);
+                final int seekBarProgress = progress;
 
-                //blurEffectIntensityValue.setText(String.format("%d", progress / 4));
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                float radius = (float) seekBarProgress;
+
+                                if (seekBarProgress == 0) {
+                                    cropImageView.setImageBitmap(bitmap);
+                                } else {
+                                    cropImageView.setImageBitmap(BlurEffectUtil.blur(CropImageViewActivity.this, bitmap, radius));
+                                }
+                            }
+                        });
+                    }
+                });
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                Log.d("SeekBar", "Value On Start: " + seekBar.getProgress());
+
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                Log.d("SeekBar", "Value On Stop: " + seekBar.getProgress());
 
-                int radius = seekBar.getProgress();
-
-                if (radius == 0) {
-                    cropImageView.setImageBitmap(bitmap);
-                } else {
-                    cropImageView.setImageBitmap(BlurEffectUtil.blur(CropImageViewActivity.this, bitmap, radius));
-                }
             }
         });
     }
@@ -139,22 +145,9 @@ public class CropImageViewActivity extends ATEActivity {
         if (isBlurIntensity) {
             isBlurIntensity = false;
 
-            YoYo.with(Techniques.FadeOut).duration(Constants.DURATIONS_OF_ANIMATIONS).playOn(blurEffectIntensity);
+            new Handler().postDelayed(hideViewsRunnable, Constants.DURATIONS_OF_ANIMATIONS);
 
-            new Timer().schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            backgroundTools.setVisibility(View.VISIBLE);
-                            blurEffectIntensity.setVisibility(View.INVISIBLE);
-                        }
-                    });
-                }
-            }, Constants.DURATIONS_OF_ANIMATIONS);
-
-            YoYo.with(Techniques.FadeInUp).duration(Constants.DURATIONS_OF_ANIMATIONS).delay(Constants.DURATIONS_OF_ANIMATIONS).playOn(backgroundTools);
+            YoYo.with(Techniques.FadeOutDown).duration(Constants.DURATIONS_OF_ANIMATIONS).playOn(blurEffectRadiusIntensity);
         } else {
             FileUtils.deleteFile(chosenFile);
 
@@ -166,22 +159,15 @@ public class CropImageViewActivity extends ATEActivity {
         if (!isBlurIntensity) {
             isBlurIntensity = true;
 
-            YoYo.with(Techniques.FadeOutDown).duration(Constants.DURATIONS_OF_ANIMATIONS).playOn(backgroundTools);
+            blurEffectRadiusIntensity.setVisibility(View.VISIBLE);
 
-            new Timer().schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            backgroundTools.setVisibility(View.INVISIBLE);
-                            blurEffectIntensity.setVisibility(View.VISIBLE);
-                        }
-                    });
-                }
-            }, Constants.DURATIONS_OF_ANIMATIONS);
+            YoYo.with(Techniques.FadeInUp).duration(Constants.DURATIONS_OF_ANIMATIONS).playOn(blurEffectRadiusIntensity);
+        } else {
+            isBlurIntensity = false;
 
-            YoYo.with(Techniques.FadeIn).duration(Constants.DURATIONS_OF_ANIMATIONS).delay(Constants.DURATIONS_OF_ANIMATIONS).playOn(blurEffectIntensity);
+            new Handler().postDelayed(hideViewsRunnable, Constants.DURATIONS_OF_ANIMATIONS);
+
+            YoYo.with(Techniques.FadeOutDown).duration(Constants.DURATIONS_OF_ANIMATIONS).playOn(blurEffectRadiusIntensity);
         }
     }
 
@@ -202,20 +188,13 @@ public class CropImageViewActivity extends ATEActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    String path = File.separator + getString(R.string.app_name) + File.separator + getString(R.string.media) + File.separator + getString(R.string.wallpaper) + File.separator;
                     String fileName = getString(R.string.background_name);
 
-                    File filepath = Environment.getExternalStorageDirectory();
-
-                    File directory = new File(filepath.getAbsolutePath() + path);
-
-                    File file = new File(directory, fileName);
-
-                    FileUtils.copyFile(chosenFile, file.getAbsolutePath());
+                    File file = new File(getExternalFilesDir(null), fileName);
 
                     FileUtils.deleteFile(chosenFile);
 
-                    if (Util.saveWallpaper(CropImageViewActivity.this, cropImageView.getCroppedBitmap(), path, fileName, false)) {
+                    if (Util.saveWallpaper(cropImageView.getCroppedBitmap(), file)) {
                         preferencesUtil.putValue(settingsPreferences, R.string.background, file.getAbsolutePath());
                     }
                 }

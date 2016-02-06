@@ -46,6 +46,10 @@
                 android:icon="@drawable/ic_system_update"
                 android:title="@string/check_update_settings" />
             <item
+                android:id="@+id/send_bug_report"
+                android:icon="@drawable/ic_send"
+                android:title="@string/send_bug_report_settings" />
+            <item
                 android:id="@+id/lic_open_source"
                 android:icon="@drawable/ic_code"
                 android:title="@string/lic_open_source" />

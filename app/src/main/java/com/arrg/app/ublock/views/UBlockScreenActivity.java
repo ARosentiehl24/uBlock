@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.graphics.Palette;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -29,6 +30,7 @@ import android.widget.ViewFlipper;
 
 import com.afollestad.appthemeengine.ATEActivity;
 import com.afollestad.appthemeengine.Config;
+import com.afollestad.materialdialogs.color.CircleView;
 import com.arrg.app.ublock.Constants;
 import com.arrg.app.ublock.R;
 import com.arrg.app.ublock.adapters.DotsAdapter;
@@ -45,7 +47,6 @@ import com.arrg.app.ublock.views.uviews.PinLockView;
 import com.arrg.app.ublock.views.uviews.UTextView;
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
-import com.samsung.android.sdk.SsdkUnsupportedException;
 import com.samsung.android.sdk.pass.Spass;
 import com.samsung.android.sdk.pass.SpassFingerprint;
 
@@ -179,8 +180,6 @@ public class UBlockScreenActivity extends ATEActivity {
     private GestureDetector gestureDetector;
     private SharedPreferences settingsPreferences;
     private SharedPreferencesUtil preferencesUtil;
-    private Spass spass;
-    private SpassFingerprint spassFingerprint;
     private String storedPin;
     private UBlockApplication uBlockApplication;
     private UBlockService services = UBlockService.UBLOCK;
@@ -190,14 +189,14 @@ public class UBlockScreenActivity extends ATEActivity {
 
         @Override
         public void onFinished(int eventStatus) {
-            Log.d("Finger", "identify finished : reason=" + getEventStatusName(eventStatus));
+            Log.d("Finger", "identify finished : reason=" + UBlockApplication.getEventStatusName(eventStatus));
 
             onReadyIdentify = false;
 
             int FingerprintIndex = 0;
 
             try {
-                FingerprintIndex = spassFingerprint.getIdentifiedFingerprintIndex();
+                FingerprintIndex = uBlockApplication.spassFingerprint.getIdentifiedFingerprintIndex();
             } catch (IllegalStateException ise) {
                 Log.d("Finger", ise.getMessage());
             }
@@ -239,28 +238,6 @@ public class UBlockScreenActivity extends ATEActivity {
         }
     };
 
-    private static String getEventStatusName(int eventStatus) {
-        switch (eventStatus) {
-            case SpassFingerprint.STATUS_AUTHENTIFICATION_SUCCESS:
-                return "STATUS_AUTHENTIFICATION_SUCCESS";
-            case SpassFingerprint.STATUS_AUTHENTIFICATION_PASSWORD_SUCCESS:
-                return "STATUS_AUTHENTIFICATION_PASSWORD_SUCCESS";
-            case SpassFingerprint.STATUS_TIMEOUT_FAILED:
-                return "STATUS_TIMEOUT";
-            case SpassFingerprint.STATUS_SENSOR_FAILED:
-                return "STATUS_SENSOR_ERROR";
-            case SpassFingerprint.STATUS_USER_CANCELLED:
-                return "STATUS_USER_CANCELLED";
-            case SpassFingerprint.STATUS_QUALITY_FAILED:
-                return "STATUS_QUALITY_FAILED";
-            case SpassFingerprint.STATUS_USER_CANCELLED_BY_TOUCH_OUTSIDE:
-                return "STATUS_USER_CANCELLED_BY_TOUCH_OUTSIDE";
-            case SpassFingerprint.STATUS_AUTHENTIFICATION_FAILED:
-            default:
-                return "STATUS_AUTHENTIFICATION_FAILED";
-        }
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -284,8 +261,6 @@ public class UBlockScreenActivity extends ATEActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
-        spassFingerprint = new SpassFingerprint(UBlockScreenActivity.this);
 
         setupInputData();
     }
@@ -357,7 +332,6 @@ public class UBlockScreenActivity extends ATEActivity {
         gestureDetector = new GestureDetector(this, new CustomGestureDetector());
         isSwipeEnabled = preferencesUtil.getBoolean(settingsPreferences, R.string.enable_swipe_on_ublock_screen, R.bool.enable_swipe_on_ublock_screen);
         patternView.setInStealthMode(!preferencesUtil.getBoolean(settingsPreferences, R.string.is_pattern_visible, R.bool.is_pattern_visible));
-        spass = new Spass();
         storedPin = preferencesUtil.getString(settingsPreferences, R.string.user_pin, R.string.default_code);
         vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
@@ -367,7 +341,7 @@ public class UBlockScreenActivity extends ATEActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        if (!Util.isSamsungDevice(UBlockScreenActivity.this) || !isFingerPrintEnabled()) {
+                        if (!Util.isSamsungDevice(UBlockScreenActivity.this) || !uBlockApplication.isFingerPrintEnabled()) {
                             for (int i = 0; i < vfUnlockMethods.getChildCount(); i++) {
                                 if (vfUnlockMethods.getChildAt(i).getId() == R.id.cv_fingerprint) {
                                     vfUnlockMethods.removeViewAt(i);
@@ -375,8 +349,6 @@ public class UBlockScreenActivity extends ATEActivity {
                                 }
                             }
                         }
-
-                        applyTheme();
                         setListeners();
                     }
                 });
@@ -385,57 +357,49 @@ public class UBlockScreenActivity extends ATEActivity {
     }
 
     public void applyTheme() {
-        if (preferencesUtil.getString(settingsPreferences, R.string.background, null) != null) {
-            Integer glassColor = ContextCompat.getColor(UBlockScreenActivity.this, R.color.glass_25);
+        if (preferencesUtil.getBoolean(settingsPreferences, R.string.change_background_ublock_screen, false)) {
+            Palette.from(((BitmapDrawable)ivAppIcon.getDrawable()).getBitmap()).generate(new Palette.PaletteAsyncListener() {
+                public void onGenerated(Palette palette) {
+                    int color = palette.getVibrantColor(Config.primaryColor(UBlockScreenActivity.this, null));
 
-            cvEtPin.setCardElevation(0);
-            cvFingerprint.setCardElevation(0);
-            cvPattern.setCardElevation(0);
-            cvPin.setCardElevation(0);
+                    fabFingerprint.setBackgroundTintList(ColorStateList.valueOf(color));
 
-            fabFingerprint.setBackgroundTintList(ColorStateList.valueOf(glassColor));
-            fabFingerprint.setElevation(0);
-            fabFingerprint.setTag("");
+                    fabSettings.setBackgroundTintList(ColorStateList.valueOf(color));
 
-            fabSettings.setBackgroundTintList(ColorStateList.valueOf(glassColor));
-            fabSettings.setElevation(0);
-            fabSettings.setTag("");
+                    getWindow().setBackgroundDrawable(new ColorDrawable(CircleView.shiftColorDown(color)));
 
-            String chosenWallpaper = preferencesUtil.getString(settingsPreferences, R.string.background, null);
-
-            Bitmap bitmap = BitmapFactory.decodeFile(chosenWallpaper);
-
-            getWindow().setBackgroundDrawable(new BitmapDrawable(getResources(), bitmap));
-
-            ThemeUtil.applyTheme(glassColor, cvEtPin, cvFingerprint, cvPattern, cvPin);
+                    ThemeUtil.applyTheme(color, cvEtPin, cvFingerprint, cvPattern, cvPin);
+                }
+            });
         } else {
-            getWindow().setBackgroundDrawable(new ColorDrawable(Config.primaryColorDark(this, null)));
+            if (preferencesUtil.getString(settingsPreferences, R.string.background, null) != null) {
+                Integer glassColor = ContextCompat.getColor(UBlockScreenActivity.this, R.color.glass_25);
 
-            ThemeUtil.applyTheme(Config.primaryColor(this, null), cvEtPin, cvFingerprint, cvPattern, cvPin);
-        }
-    }
+                cvEtPin.setCardElevation(0);
+                cvFingerprint.setCardElevation(0);
+                cvPattern.setCardElevation(0);
+                cvPin.setCardElevation(0);
 
-    public boolean isFingerPrintEnabled() {
-        try {
-            spass.initialize(UBlockScreenActivity.this);
-        } catch (SsdkUnsupportedException e) {
-            Log.d("Finger", "Exception: " + e);
-        } catch (UnsupportedOperationException e) {
-            Log.d("Finger", "Fingerprint Service is not supported in the device");
-        }
+                fabFingerprint.setBackgroundTintList(ColorStateList.valueOf(glassColor));
+                fabFingerprint.setElevation(0);
+                fabFingerprint.setTag("");
 
-        Boolean isFeatureEnabled = spass.isFeatureEnabled(Spass.DEVICE_FINGERPRINT);
+                fabSettings.setBackgroundTintList(ColorStateList.valueOf(glassColor));
+                fabSettings.setElevation(0);
+                fabSettings.setTag("");
 
-        if (isFeatureEnabled) {
-            spassFingerprint = new SpassFingerprint(UBlockScreenActivity.this);
-            log("Fingerprint Service is supported in the device.");
-            log("SDK version : " + spass.getVersionName());
+                String chosenWallpaper = preferencesUtil.getString(settingsPreferences, R.string.background, null);
 
-            return true;
-        } else {
-            log("Fingerprint Service is not supported in the device.");
+                Bitmap bitmap = BitmapFactory.decodeFile(chosenWallpaper);
 
-            return false;
+                getWindow().setBackgroundDrawable(new BitmapDrawable(getResources(), bitmap));
+
+                ThemeUtil.applyTheme(glassColor, cvEtPin, cvFingerprint, cvPattern, cvPin);
+            } else {
+                getWindow().setBackgroundDrawable(new ColorDrawable(Config.primaryColorDark(this, null)));
+
+                ThemeUtil.applyTheme(Config.primaryColor(this, null), cvEtPin, cvFingerprint, cvPattern, cvPin);
+            }
         }
     }
 
@@ -469,7 +433,7 @@ public class UBlockScreenActivity extends ATEActivity {
                     vibrator.vibrate(Constants.DURATIONS_OF_ANIMATIONS);
 
                     patternView.setDisplayMode(PatternLockView.DisplayMode.Wrong);
-                    YoYo.with(Techniques.Tada).duration(Constants.DURATIONS_OF_ANIMATIONS).playOn(patternView);
+                    YoYo.with(Techniques.Shake).duration(Constants.DURATIONS_OF_ANIMATIONS).playOn(patternView);
 
                     new Timer().schedule(new TimerTask() {
                         @Override
@@ -516,7 +480,8 @@ public class UBlockScreenActivity extends ATEActivity {
                             Util.closeInverse(UBlockScreenActivity.this, true);
                         }
                     } else {
-                        YoYo.with(Techniques.Tada).duration(Constants.DURATIONS_OF_ANIMATIONS).playOn(etPin);
+                        YoYo.with(Techniques.Shake).duration(Constants.DURATIONS_OF_ANIMATIONS).playOn(etPin);
+                        YoYo.with(Techniques.Shake).duration(Constants.DURATIONS_OF_ANIMATIONS).playOn(recyclerView);
                     }
                 } else {
                     String pinValue = String.valueOf(pinButtonEnum.getButtonValue());
@@ -563,13 +528,13 @@ public class UBlockScreenActivity extends ATEActivity {
 
     public void displayFingerPrintRecognizer() {
         try {
-            if (!spassFingerprint.hasRegisteredFinger()) {
+            if (!uBlockApplication.spassFingerprint.hasRegisteredFinger()) {
                 log("Please register finger first");
             } else {
                 if (!onReadyIdentify) {
                     onReadyIdentify = true;
                     try {
-                        spassFingerprint.startIdentifyWithDialog(UBlockScreenActivity.this, listener, false);
+                        uBlockApplication.spassFingerprint.startIdentifyWithDialog(UBlockScreenActivity.this, listener, false);
                         log("Please identify finger to verify you");
                     } catch (IllegalStateException e) {
                         onReadyIdentify = false;
@@ -586,22 +551,22 @@ public class UBlockScreenActivity extends ATEActivity {
 
     public void displayFingerPrintRecognizerWithIndex() {
         try {
-            if (!spassFingerprint.hasRegisteredFinger()) {
+            if (!uBlockApplication.spassFingerprint.hasRegisteredFinger()) {
                 log("Please register finger first");
             } else {
                 if (!onReadyIdentify) {
                     onReadyIdentify = true;
-                    if (spass.isFeatureEnabled(Spass.DEVICE_FINGERPRINT_FINGER_INDEX)) {
+                    if (uBlockApplication.spass.isFeatureEnabled(Spass.DEVICE_FINGERPRINT_FINGER_INDEX)) {
                         ArrayList<Integer> designatedFingers = new ArrayList<>();
                         designatedFingers.add(preferencesUtil.getInt(settingsPreferences, R.string.designated_finger, 1));
                         try {
-                            spassFingerprint.setIntendedFingerprintIndex(designatedFingers);
+                            uBlockApplication.spassFingerprint.setIntendedFingerprintIndex(designatedFingers);
                         } catch (IllegalStateException ise) {
                             log(ise.getMessage());
                         }
                     }
                     try {
-                        spassFingerprint.startIdentifyWithDialog(UBlockScreenActivity.this, listener, false);
+                        uBlockApplication.spassFingerprint.startIdentifyWithDialog(UBlockScreenActivity.this, listener, false);
                         log("Please identify fingerprint index " + preferencesUtil.getInt(settingsPreferences, R.string.designated_finger, 1) + " to verify you");
                     } catch (IllegalStateException e) {
                         onReadyIdentify = false;
@@ -619,7 +584,7 @@ public class UBlockScreenActivity extends ATEActivity {
     public void setupInputData(){
         ArrayList<ImageView> dots = new ArrayList<>();
 
-        dotsAdapter = new DotsAdapter(this, dots, Config.primaryColorDark(this, null));
+        dotsAdapter = new DotsAdapter(this, dots, ContextCompat.getColor(this, R.color.background_light));
 
         recyclerView.setAdapter(dotsAdapter);
         recyclerView.setLayoutManager(new ULinearLayoutManager(this, ULinearLayoutManager.HORIZONTAL, false));
@@ -660,6 +625,8 @@ public class UBlockScreenActivity extends ATEActivity {
                         ApplicationInfo applicationInfo = getPackageManager().getApplicationInfo(getIntent().getStringExtra(getString(R.string.activityOnTop)), 0);
                         ivAppIcon.setImageDrawable(applicationInfo.loadIcon(getPackageManager()));
                         tvAppName.setText(applicationInfo.loadLabel(getPackageManager()));
+
+                        applyTheme();
                     } catch (PackageManager.NameNotFoundException e) {
                         e.printStackTrace();
                     }

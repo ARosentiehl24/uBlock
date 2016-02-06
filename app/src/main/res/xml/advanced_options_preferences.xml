@@ -49,4 +49,11 @@
         android:summaryOff="Off"
         android:summaryOn="On"
         android:title="@string/is_pattern_visible_option" />
+
+    <com.arrg.app.ublock.views.uviews.USwitchPreference
+        android:defaultValue="@bool/change_background_ublock_screen"
+        android:key="@string/change_background_ublock_screen"
+        android:summaryOff="Off"
+        android:summaryOn="On"
+        android:title="@string/change_background_ublock_screen_option" />
 </PreferenceScreen>

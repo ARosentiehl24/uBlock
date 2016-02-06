@@ -5,7 +5,10 @@
     <string name="anyone">Cualquiera</string>
     <string name="automatic_color_summary"> Este color se genera automáticamente</string>
     <string name="block_app_installed_message">¿Quieres bloquear la nueva aplicación instalada?</string>
+    <string name="blur">Desenfoque</string>
     <string name="blur_effect">Efecto de desenfoque</string>
+    <string name="change_background_ublock_screen_message">Esta opción eliminará la imagen que ha seleccionado como fondo.</string>
+    <string name="change_background_ublock_screen_option">Cambiar el fondo de pantalla de uBlock de forma dinámica.</string>
     <string name="check_for_update_message">Comprobando actualización, por favor espere…</string>
     <string name="check_update_settings">Buscar actualizaciones</string>
     <string name="choose_background">Escoja una imagen</string>
@@ -23,6 +26,7 @@
     <string name="crash_toast_text">Se ha producido un error inesperado :(</string>
     <string name="crash_user_email_label">Ingresa tu correo electrónico:</string>
     <string name="crop">Cortar</string>
+    <string name="crop_picture">Recortar la fotografía</string>
     <string name="current_version">Versión actual: v%s</string>
     <string name="current_wallpaper">Fondo de pantalla del sistema</string>
     <string name="done">Hecho</string>
@@ -38,6 +42,8 @@
     <string name="fingerprint_index_to_unlock_description">Índice de la huella digital seleccionada para desbloquear aplicaciones:</string>
     <string name="fingerprint_on_top_option">Mostrar detector de huellas digitales al iniciar funciones relacionadas con esto.</string>
     <string name="fingerprint_service_is_not_supported">Servicio de huellas dactilares no se admite en el dispositivo</string>
+    <string name="from_gallery">Galería</string>
+    <string name="from_camera">Cámara</string>
     <string name="icon_on_app_drawer_message">Al ocultar el icono del cajon de aplicaciones, debe llamar al *#*#123#*#* para iniciar la aplicación, la aplicación se cerrará automáticamente.</string>
     <string name="image_saved_correctly">Imagen guardada correctamente en: </string>
     <string name="invalid_input">Entrada inválida</string>
@@ -60,6 +66,7 @@
     <string name="pin">Pin</string>
     <string name="please_press_back_again">Presione ATRÁS otra vez para salir</string>
     <string name="please_wait_auto_update">Por favor espera, actualización automática en curso.</string>
+    <string name="profile_picture">Foto de perfil</string>
     <string name="register_new_fingerprint">Registrar una nueva huella digital</string>
     <string name="register_new_fingerprint_description">Establecer una nueva huella digital para desbloquear aplicaciones.</string>
     <string name="repeat_pattern_request">Repita el patrón por favor:</string>
@@ -67,6 +74,7 @@
     <string name="report_bug_settings">Enviar reporte de error</string>
     <string name="reset">Resetear</string>
     <string name="saving_background">Procesando, por favor espere…</string>
+    <string name="send_bug_report_settings">Enviar informe de error</string>
     <string name="security_action_settings">Ajustes de seguridad</string>
     <string name="security_finger_print_settings">Huella dactilar</string>
     <string name="security_password_settings">Contraseña</string>
@@ -105,4 +113,5 @@
     <string name="title_activity_pattern_settings">Ajustes de patrón</string>
     <string name="title_activity_font">Ajusted de fuente</string>
     <string name="show_dialog_when_new_apps_are_installed_option">Mostrar diálogo cuando se instalan nuevas aplicaciones.</string>
+    <string name="picture_source">¿De donde quieres obtener la imagen?</string>
 </resources>

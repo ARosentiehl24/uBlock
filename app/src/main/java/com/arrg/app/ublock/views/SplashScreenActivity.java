@@ -112,7 +112,7 @@ public class SplashScreenActivity extends ATEActivity {
 
         @Override
         public void onFinished(int eventStatus) {
-            Log.d("Finger", "identify finished : reason=" + getEventStatusName(eventStatus));
+            Log.d("Finger", "identify finished : reason=" + UBlockApplication.getEventStatusName(eventStatus));
 
             onReadyIdentify = false;
 
@@ -148,29 +148,6 @@ public class SplashScreenActivity extends ATEActivity {
             Log.d("Finger", "User touched fingerprint sensor!");
         }
     };
-
-    private static String getEventStatusName(int eventStatus) {
-        switch (eventStatus) {
-            case SpassFingerprint.STATUS_AUTHENTIFICATION_SUCCESS:
-                return "STATUS_AUTHENTIFICATION_SUCCESS";
-            case SpassFingerprint.STATUS_AUTHENTIFICATION_PASSWORD_SUCCESS:
-                return "STATUS_AUTHENTIFICATION_PASSWORD_SUCCESS";
-            case SpassFingerprint.STATUS_TIMEOUT_FAILED:
-                return "STATUS_TIMEOUT";
-            case SpassFingerprint.STATUS_SENSOR_FAILED:
-                return "STATUS_SENSOR_ERROR";
-            case SpassFingerprint.STATUS_USER_CANCELLED:
-                return "STATUS_USER_CANCELLED";
-            case SpassFingerprint.STATUS_QUALITY_FAILED:
-                return "STATUS_QUALITY_FAILED";
-            case SpassFingerprint.STATUS_USER_CANCELLED_BY_TOUCH_OUTSIDE:
-                return "STATUS_USER_CANCELLED_BY_TOUCH_OUTSIDE";
-            case SpassFingerprint.STATUS_AUTHENTIFICATION_FAILED:
-            default:
-                return "STATUS_AUTHENTIFICATION_FAILED";
-        }
-
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -296,7 +273,7 @@ public class SplashScreenActivity extends ATEActivity {
                     vibrator.vibrate(Constants.DURATIONS_OF_ANIMATIONS);
 
                     patternView.setDisplayMode(PatternLockView.DisplayMode.Wrong);
-                    YoYo.with(Techniques.Tada).duration(Constants.DURATIONS_OF_ANIMATIONS).playOn(patternView);
+                    YoYo.with(Techniques.Shake).duration(Constants.DURATIONS_OF_ANIMATIONS).playOn(patternView);
 
                     new Timer().schedule(new TimerTask() {
                         @Override
@@ -332,6 +309,7 @@ public class SplashScreenActivity extends ATEActivity {
                         Util.open(SplashScreenActivity.this, ApplicationsListActivity.class, false);
                     } else {
                         YoYo.with(Techniques.Shake).duration(Constants.DURATIONS_OF_ANIMATIONS).playOn(etPin);
+                        YoYo.with(Techniques.Shake).duration(Constants.DURATIONS_OF_ANIMATIONS).playOn(recyclerView);
                     }
                 } else {
                     String pinValue = String.valueOf(pinButtonEnum.getButtonValue());

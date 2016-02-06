@@ -14,13 +14,11 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Environment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.arrg.app.ublock.R;
 import com.arrg.app.ublock.views.SplashScreenActivity;
@@ -153,35 +151,12 @@ public class Util {
         return (tm.getSimState() == TelephonyManager.SIM_STATE_ABSENT);
     }
 
-    public static Boolean saveWallpaper(AppCompatActivity activity, Bitmap bitmap, String path, String fileName, Boolean showMessage) {
+    public static boolean saveWallpaper(Bitmap bitmap, File picture) {
         // TODO Auto-generated method stub
 
-        OutputStream output;
-
-        // Find the SD Card path
-        File filepath = Environment.getExternalStorageDirectory();
-
-        // Create a new folder in SD Card
-        File directory = new File(filepath.getAbsolutePath() + path);
-
-        directory.mkdirs();
-
-        // Create a name for the saved image
-        File file = new File(directory, fileName);
-
-        //preferencesUtil.putValue(settingsPreferences, R.string.background, file.getAbsolutePath());
-
-        File checkFile = new File(file.getAbsolutePath());
-
-        if (checkFile.exists() && showMessage) {
-            // Show a toast message on successful save
-            Toast.makeText(activity, activity.getString(R.string.image_saved_correctly) + " " + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
-        }
-
         try {
-            output = new FileOutputStream(file);
+            OutputStream output = new FileOutputStream(picture);
 
-            // Compress into png format image from 0% - 100%
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, output);
             output.flush();
             output.close();
@@ -257,18 +232,8 @@ public class Util {
 
         OutputStream output;
 
-        // Find the SD Card path
-        File filepath = activity.getDir(Environment.DIRECTORY_PICTURES, Context.MODE_PRIVATE);
-
-        // Create a new folder in SD Card
-        File directory = new File(filepath.getAbsolutePath());
-
-        directory.mkdirs();
-
         // Create a name for the saved image
-        File file = new File(directory, activity.getString(R.string.background_name));
-
-        //preferencesUtil.putValue(settingsPreferences, R.string.background, file.getAbsolutePath());
+        File file = new File(activity.getExternalCacheDir(), activity.getString(R.string.background_name));
 
         File checkFile = new File(file.getAbsolutePath());
 

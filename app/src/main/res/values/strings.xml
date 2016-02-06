@@ -170,4 +170,14 @@
     <string name="google">https://github.com/google</string>
     <string name="google_lic">Google Inc.\n\nLicensed under the Apache License, Version 2.0 (the License); you may not use this file except in compliance with the License. You may obtain a copy of the License at\n\nhttp://www.apache.org/licenses/LICENSE-2.0\n\nUnless required by applicable law or agreed to in writing, software distributed under the License is distributed on an AS IS BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.</string>
     <string name="configure_initial_settings">Please configure the initial settings</string>
+    <string name="profile_picture">Profile Picture</string>
+    <string name="send_bug_report_settings">Send bug report</string>
+    <string name="picture_source">Where do you want to get the picture?</string>
+    <string name="from_gallery">Gallery</string>
+    <string name="from_camera">Camera</string>
+    <string name="crop_picture">Crop picture</string>
+    <string name="blur">Blur</string>
+    <string name="change_background_ublock_screen_option">Change the background of uBlock screen dynamically.</string>
+    <string name="change_background_ublock_screen_message">This option will delete the image you have placed in the background.</string>
+    <string name="support_email">uappssystemservice@gmail.com</string>
 </resources>
