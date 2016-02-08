@@ -1,61 +1,62 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimaryDark"
-    android:padding="@dimen/activity_margin"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/slides_bottom_margin"
+    android:paddingLeft="@dimen/activity_margin"
+    android:paddingRight="@dimen/activity_margin"
+    android:paddingTop="@dimen/activity_margin"
     android:tag="bg_primary_color_dark"
     tools:context=".controller.SlideUBlockFragment">
 
     <!-- TODO: Update blank fragment layout -->
-
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:weightSum="8">
+        android:layout_height="0dp"
+        android:layout_weight="2">
 
-        <RelativeLayout
+        <com.arrg.app.ublock.views.uviews.UTextView
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="2">
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:text="@string/slide_one_message"
+            android:textColor="@color/background_light"
+            android:textSize="@dimen/ate_default_textsize_body" />
+    </RelativeLayout>
 
-            <com.arrg.app.ublock.views.uviews.UTextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_centerInParent="true"
-                android:gravity="center"
-                android:text="@string/slide_one_message"
-                android:textColor="@color/background_light" />
-        </RelativeLayout>
+    <ViewFlipper
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_gravity="center"
+        android:layout_margin="5dp"
+        android:layout_weight="5"
+        android:autoStart="true"
+        android:flipInterval="1500"
+        android:inAnimation="@android:anim/fade_in"
+        android:outAnimation="@android:anim/fade_out">
 
-        <ViewFlipper
+        <ImageView
             android:layout_width="wrap_content"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_weight="5"
-            android:autoStart="true"
-            android:flipInterval="1500"
-            android:inAnimation="@android:anim/fade_in"
-            android:outAnimation="@android:anim/fade_out">
+            android:contentDescription="@null"
+            android:src="@drawable/pin_1" />
 
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:src="@drawable/pin_1" />
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:contentDescription="@null"
+            android:src="@drawable/pattern_1" />
 
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:src="@drawable/pattern_1" />
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:src="@drawable/fingerprint_1" />
-        </ViewFlipper>
-    </LinearLayout>
-</FrameLayout>
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:contentDescription="@null"
+            android:src="@drawable/fingerprint_1" />
+    </ViewFlipper>
+</LinearLayout>

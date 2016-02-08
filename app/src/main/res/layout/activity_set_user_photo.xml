@@ -28,15 +28,17 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="75dp"
         android:layout_alignParentBottom="true"
         android:background="@color/glass_50">
 
         <Button
-            style="?android:attr/buttonBarButtonStyle"
             android:id="@+id/btn_accept"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_margin="@dimen/activity_margin"
+            android:background="@drawable/button_bar_style_glass"
             android:text="@string/crop_picture"
             android:textColor="@color/background_light" />
     </RelativeLayout>

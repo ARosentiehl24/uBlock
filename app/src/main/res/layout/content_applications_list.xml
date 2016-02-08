@@ -10,13 +10,19 @@
     tools:context="com.arrg.app.ublock.views.ApplicationsListActivity"
     tools:showIn="@layout/app_bar_applications_list">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rv_applications"
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/SwipeRefreshLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:scrollbarStyle="outsideOverlay"
-        android:visibility="invisible" />
+        android:layout_height="wrap_content">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_applications"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:scrollbarStyle="outsideOverlay"
+            android:visibility="invisible" />
+    </android.support.v4.widget.SwipeRefreshLayout>
 
     <com.lsjwzh.widget.materialloadingprogressbar.CircleProgressBar
         android:id="@+id/progressBar"
@@ -25,7 +31,7 @@
         android:layout_centerHorizontal="true"
         android:layout_gravity="center|top"
         android:layout_marginTop="@dimen/progress_bar_margin"
-        android:visibility="visible"
+        android:visibility="invisible"
         app:mlpb_progress_color="#566da9"
         app:mlpb_progress_stoke_width="2.5dp"
         app:mlpb_show_arrow="true" />

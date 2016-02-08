@@ -66,9 +66,4 @@
 
     <style name="Theme.Dialog" parent="Theme.AppCompat.Light.Dialog.Alert" />
 
-    <style name="SeekBarTexts">
-        <item name="android:textSize">12.5sp</item>
-        <item name="android:textColor">@color/background_light</item>
-        <item name="android:textViewStyle">@style/RobotoTextViewStyle</item>
-    </style>
 </resources>

@@ -47,86 +47,48 @@
             android:baselineAligned="false"
             android:visibility="visible">
 
-            <RelativeLayout
+            <com.arrg.app.ublock.views.uviews.UButton
                 android:id="@+id/rotate"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_margin="5dp"
                 android:layout_weight="1"
-                android:background="?android:attr/selectableItemBackground"
-                android:padding="5dp">
+                android:background="@drawable/button_bar_style_glass"
+                android:drawableTop="@drawable/ic_rotate_90_degrees"
+                android:gravity="center"
+                android:text="@string/orientation"
+                android:textColor="@color/background_light"
+                android:textSize="12sp" />
 
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:clickable="false"
-                    android:contentDescription="@null"
-                    android:src="@drawable/ic_rotate_90_degrees" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:layout_centerHorizontal="true"
-                    android:gravity="center"
-                    android:text="@string/orientation"
-                    android:textColor="@color/background_light"
-                    android:textSize="12.5sp" />
-            </RelativeLayout>
-
-            <RelativeLayout
+            <com.arrg.app.ublock.views.uviews.UButton
                 android:id="@+id/blur"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:layout_margin="5dp"
                 android:layout_weight="1"
-                android:background="?android:attr/selectableItemBackground"
-                android:padding="5dp">
+                android:background="@drawable/button_bar_style_glass"
+                android:drawableTop="@drawable/ic_blur_on"
+                android:gravity="center"
+                android:text="@string/blur_effect"
+                android:textColor="@color/background_light"
+                android:textSize="12sp" />
 
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:clickable="false"
-                    android:contentDescription="@null"
-                    android:src="@drawable/ic_blur_on" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:layout_centerHorizontal="true"
-                    android:gravity="center"
-                    android:text="@string/blur_effect"
-                    android:textColor="@color/background_light"
-                    android:textSize="12.5sp" />
-            </RelativeLayout>
-
-            <RelativeLayout
+            <com.arrg.app.ublock.views.uviews.UButton
                 android:id="@+id/done"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:layout_margin="5dp"
                 android:layout_weight="1"
-                android:background="?android:attr/selectableItemBackground"
-                android:padding="5dp">
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:clickable="false"
-                    android:contentDescription="@null"
-                    android:src="@drawable/ic_done" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:layout_centerHorizontal="true"
-                    android:gravity="center"
-                    android:text="@string/done"
-                    android:textColor="@color/background_light"
-                    android:textSize="12.5sp" />
-            </RelativeLayout>
+                android:background="@drawable/button_bar_style_glass"
+                android:drawableTop="@drawable/ic_done"
+                android:gravity="center"
+                android:text="@string/done"
+                android:textColor="@color/background_light"
+                android:textSize="12sp" />
         </LinearLayout>
 
         <LinearLayout

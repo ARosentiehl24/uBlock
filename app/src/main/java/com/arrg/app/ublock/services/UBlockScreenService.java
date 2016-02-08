@@ -112,17 +112,7 @@ public class UBlockScreenService extends Service implements View.OnKeyListener {
                 preferencesUtil.putValue(settingsPreferences, R.string.last_unlock_method, vfUnlockMethods.getDisplayedChild());
 
                 if (openSettings) {
-                    Intent applicationListIntent = new Intent(UBlockScreenService.this, ApplicationsListActivity.class);
-
-                    Bundle bundle = new Bundle();
-                    bundle.putBoolean(getString(R.string.was_open_from_ublock_screen), true);
-
-                    applicationListIntent.putExtras(bundle);
-                    applicationListIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-                    startActivity(applicationListIntent);
-
-                    finish(false);
+                    openSettings();
                 } else {
                     services.unLockApp(mIntent.getStringExtra(getString(R.string.activityOnTop)));
 
@@ -208,17 +198,28 @@ public class UBlockScreenService extends Service implements View.OnKeyListener {
 
                     ivAppIcon.setImageResource(R.drawable.play_store_icon);
                     tvAppName.setText(R.string.action_settings);
+                } else {
+                    openSettings = false;
 
-                    if (vfUnlockMethods.getCurrentView().getId() == R.id.cv_fingerprint) {
-                        if (preferencesUtil.getInt(settingsPreferences, R.string.designated_finger, 0) == 0) {
-                            displayFingerPrintRecognizer();
-                        } else {
-                            displayFingerPrintRecognizerWithIndex();
-                        }
+                    try {
+                        ApplicationInfo applicationInfo = getPackageManager().getApplicationInfo(mIntent.getStringExtra(getString(R.string.activityOnTop)), 0);
+                        ivAppIcon.setImageDrawable(applicationInfo.loadIcon(getPackageManager()));
+                        tvAppName.setText(applicationInfo.loadLabel(getPackageManager()));
+                    } catch (PackageManager.NameNotFoundException e) {
+                        e.printStackTrace();
                     }
                 }
                 break;
         }
+
+        if (vfUnlockMethods.getCurrentView().getId() == R.id.cv_fingerprint) {
+            if (preferencesUtil.getInt(settingsPreferences, R.string.designated_finger, 0) == 0) {
+                displayFingerPrintRecognizer();
+            } else {
+                displayFingerPrintRecognizerWithIndex();
+            }
+        }
+
         return true;
     }
 
@@ -230,20 +231,9 @@ public class UBlockScreenService extends Service implements View.OnKeyListener {
             preferencesUtil.putValue(settingsPreferences, R.string.last_unlock_method, vfUnlockMethods.getDisplayedChild());
 
             if (openSettings) {
-                Intent applicationListIntent = new Intent(this, ApplicationsListActivity.class);
-
-                Bundle bundle = new Bundle();
-                bundle.putBoolean(getString(R.string.was_open_from_ublock_screen), true);
-
-                applicationListIntent.putExtras(bundle);
-                applicationListIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-                startActivity(applicationListIntent);
-
-                finish(false);
+                openSettings();
             } else {
                 services.unLockApp(mIntent.getStringExtra(getString(R.string.activityOnTop)));
-
                 finish(false);
             }
         }
@@ -335,6 +325,20 @@ public class UBlockScreenService extends Service implements View.OnKeyListener {
         return root;
     }
 
+    public void openSettings() {
+        Intent applicationListIntent = new Intent(this, ApplicationsListActivity.class);
+
+        Bundle bundle = new Bundle();
+        bundle.putBoolean(getString(R.string.was_open_from_ublock_screen), true);
+
+        applicationListIntent.putExtras(bundle);
+        applicationListIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        startActivity(applicationListIntent);
+
+        finish(false);
+    }
+
     public void finish(boolean launchHomeScreen) {
         if (launchHomeScreen) {
             Intent startHomeScreen = new Intent(Intent.ACTION_MAIN);
@@ -358,14 +362,12 @@ public class UBlockScreenService extends Service implements View.OnKeyListener {
     }
 
     public void setupInitialSettings() {
-        etPin.setText("");
-        patternView.clearPattern();
-
         enableFingerPrintRecognizer = preferencesUtil.getBoolean(settingsPreferences, R.string.user_fingerprint, R.bool.user_fingerprint);
-        gestureDetector = new GestureDetector(this, new CustomGestureDetector());
         isSwipeEnabled = preferencesUtil.getBoolean(settingsPreferences, R.string.enable_swipe_on_ublock_screen, R.bool.enable_swipe_on_ublock_screen);
         patternView.setInStealthMode(!preferencesUtil.getBoolean(settingsPreferences, R.string.is_pattern_visible, R.bool.is_pattern_visible));
         storedPin = preferencesUtil.getString(settingsPreferences, R.string.user_pin, R.string.default_code);
+
+        gestureDetector = new GestureDetector(this, new CustomGestureDetector());
         vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
         if (!Util.isSamsungDevice(UBlockScreenService.this) || !uBlockApplication.isFingerPrintEnabled()) {
@@ -385,49 +387,7 @@ public class UBlockScreenService extends Service implements View.OnKeyListener {
             displayInput(vfUnlockMethods.getCurrentView().getId());
         }
 
-        //applyTheme();
         setListeners();
-    }
-
-    public void applyTheme() {
-        if (preferencesUtil.getBoolean(settingsPreferences, R.string.change_background_ublock_screen, false)) {
-            Palette.from(((BitmapDrawable) ivAppIcon.getDrawable()).getBitmap()).generate(new Palette.PaletteAsyncListener() {
-                public void onGenerated(Palette palette) {
-                    Integer iconColor = palette.getVibrantColor(Config.primaryColor(UBlockScreenService.this, null));
-
-                    fabFingerprint.setBackgroundTintList(ColorStateList.valueOf(iconColor));
-
-                    container.setBackground(new ColorDrawable(CircleView.shiftColorDown(iconColor)));
-
-                    ThemeUtil.applyTheme(iconColor, cvEtPin, cvFingerprint, cvPattern, cvPin);
-                }
-            });
-        } else {
-            if (preferencesUtil.getString(settingsPreferences, R.string.background, null) != null) {
-                Integer glassColor = ContextCompat.getColor(UBlockScreenService.this, R.color.glass_25);
-
-                cvEtPin.setCardElevation(0);
-                cvFingerprint.setCardElevation(0);
-                cvPattern.setCardElevation(0);
-                cvPin.setCardElevation(0);
-
-                fabFingerprint.setBackgroundTintList(ColorStateList.valueOf(glassColor));
-                fabFingerprint.setElevation(0);
-                fabFingerprint.setTag("");
-
-                String chosenWallpaper = preferencesUtil.getString(settingsPreferences, R.string.background, null);
-
-                Bitmap bitmap = BitmapFactory.decodeFile(chosenWallpaper);
-
-                container.setBackground(new BitmapDrawable(getResources(), bitmap));
-
-                ThemeUtil.applyTheme(glassColor, cvEtPin, cvFingerprint, cvPattern, cvPin);
-            } else {
-                container.setBackground(new ColorDrawable(Config.primaryColorDark(this, null)));
-
-                ThemeUtil.applyTheme(Config.primaryColor(this, null), cvEtPin, cvFingerprint, cvPattern, cvPin);
-            }
-        }
     }
 
     public void setListeners() {
@@ -444,17 +404,7 @@ public class UBlockScreenService extends Service implements View.OnKeyListener {
                     preferencesUtil.putValue(settingsPreferences, R.string.last_unlock_method, vfUnlockMethods.getDisplayedChild());
 
                     if (openSettings) {
-                        Intent applicationListIntent = new Intent(UBlockScreenService.this, ApplicationsListActivity.class);
-
-                        Bundle bundle = new Bundle();
-                        bundle.putBoolean(getString(R.string.was_open_from_ublock_screen), true);
-
-                        applicationListIntent.putExtras(bundle);
-                        applicationListIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-                        startActivity(applicationListIntent);
-
-                        finish(false);
+                        openSettings();
                     } else {
                         services.unLockApp(mIntent.getStringExtra(getString(R.string.activityOnTop)));
 
@@ -493,17 +443,7 @@ public class UBlockScreenService extends Service implements View.OnKeyListener {
                         preferencesUtil.putValue(settingsPreferences, R.string.last_unlock_method, vfUnlockMethods.getDisplayedChild());
 
                         if (openSettings) {
-                            Intent applicationListIntent = new Intent(UBlockScreenService.this, ApplicationsListActivity.class);
-
-                            Bundle bundle = new Bundle();
-                            bundle.putBoolean(getString(R.string.was_open_from_ublock_screen), true);
-
-                            applicationListIntent.putExtras(bundle);
-                            applicationListIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-                            startActivity(applicationListIntent);
-
-                            finish(false);
+                            openSettings();
                         } else {
                             services.unLockApp(mIntent.getStringExtra(getString(R.string.activityOnTop)));
 
@@ -672,6 +612,47 @@ public class UBlockScreenService extends Service implements View.OnKeyListener {
                 applyTheme();
             } catch (PackageManager.NameNotFoundException e) {
                 e.printStackTrace();
+            }
+        }
+
+        public void applyTheme() {
+            if (preferencesUtil.getBoolean(settingsPreferences, R.string.change_background_ublock_screen, false)) {
+                Palette.from(((BitmapDrawable) ivAppIcon.getDrawable()).getBitmap()).generate(new Palette.PaletteAsyncListener() {
+                    public void onGenerated(Palette palette) {
+                        Integer iconColor = palette.getVibrantColor(Config.primaryColor(UBlockScreenService.this, null));
+
+                        fabFingerprint.setBackgroundTintList(ColorStateList.valueOf(iconColor));
+
+                        container.setBackground(new ColorDrawable(CircleView.shiftColorDown(iconColor)));
+
+                        ThemeUtil.applyTheme(iconColor, cvEtPin, cvFingerprint, cvPattern, cvPin);
+                    }
+                });
+            } else {
+                if (preferencesUtil.getString(settingsPreferences, R.string.background, null) != null) {
+                    Integer glassColor = ContextCompat.getColor(UBlockScreenService.this, R.color.glass_25);
+
+                    cvEtPin.setCardElevation(0);
+                    cvFingerprint.setCardElevation(0);
+                    cvPattern.setCardElevation(0);
+                    cvPin.setCardElevation(0);
+
+                    fabFingerprint.setBackgroundTintList(ColorStateList.valueOf(glassColor));
+                    fabFingerprint.setElevation(0);
+                    fabFingerprint.setTag("");
+
+                    String chosenWallpaper = preferencesUtil.getString(settingsPreferences, R.string.background, null);
+
+                    Bitmap bitmap = BitmapFactory.decodeFile(chosenWallpaper);
+
+                    container.setBackground(new BitmapDrawable(getResources(), bitmap));
+
+                    ThemeUtil.applyTheme(glassColor, cvEtPin, cvFingerprint, cvPattern, cvPin);
+                } else {
+                    container.setBackground(new ColorDrawable(Config.primaryColorDark(UBlockScreenService.this, null)));
+
+                    ThemeUtil.applyTheme(Config.primaryColor(UBlockScreenService.this, null), cvEtPin, cvFingerprint, cvPattern, cvPin);
+                }
             }
         }
     }

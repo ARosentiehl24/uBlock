@@ -7,6 +7,7 @@
     <string name="block_app_installed_message">¿Quieres bloquear la nueva aplicación instalada?</string>
     <string name="blur">Desenfoque</string>
     <string name="blur_effect">Efecto de desenfoque</string>
+    <string name="bug_report_subject">Informe de error en %1$s v%2$s</string>
     <string name="change_background_ublock_screen_message">Esta opción eliminará la imagen que ha seleccionado como fondo.</string>
     <string name="change_background_ublock_screen_option">Cambiar el fondo de pantalla de uBlock de forma dinámica.</string>
     <string name="check_for_update_message">Comprobando actualización, por favor espere…</string>
@@ -14,7 +15,7 @@
     <string name="choose_background">Escoja una imagen</string>
     <string name="choose_color_request">Pulse aquí y elija su color favorito</string>
     <string name="close">Cerrar</string>
-    <string name="configure_initial_settings">Por favor, configure los ajustes iniciales</string>
+    <string name="configure_initial_settings">Por favor configure los ajustes de seguridad</string>
     <string name="confirm_password">Confirmar contraseña</string>
     <string name="confirm_pin">Confirmar pin</string>
     <string name="connecting_with_server">Conectando con el servidor…</string>
@@ -31,8 +32,10 @@
     <string name="current_wallpaper">Fondo de pantalla del sistema</string>
     <string name="done">Hecho</string>
     <string name="download_progress">Progreso: %1$s/%2$s</string>
+    <string name="draw_over_other_apps_permission">Permitir dibujar sobre otras aplicaciones</string>
     <string name="enable_icon_on_app_drawer_option">Mostrar icono en cajón de aplicaciones.</string>
     <string name="enable_notification_on_status_bar_option">Mostrar notificación en la barra de estado.</string>
+    <string name="enable_permissions_request">Debes habilitar ciertos permisos para que la aplicación funcione correctamente.</string>
     <string name="enable_swipe_on_ublock_screen_option">Habilitar el deslizamiento en la pantalla de uBlock.</string>
     <string name="enable_usage_stats_message">Por favor, activa el uso de estadísticas para un mejor rendimiento de la aplicación.</string>
     <string name="exit">Salir</string>
@@ -98,6 +101,7 @@
     <string name="title_activity_background_settings">Ajustes de fondo</string>
     <string name="title_activity_crop_image_view">Ajustes de fondo</string>
     <string name="title_activity_fingerprint_settings">Ajustes de huella digital</string>
+    <string name="usage_stats_permission">Permitir el uso de estadísticas</string>
     <string name="wrong_pin_is_not_equal">Los pin no coinciden, por favor intenta de nuevo</string>
     <string name="wrong_password_is_not_equal">Las contraseñas no coinciden, por favor intenta de nuevo</string>
     <string name="wallpaper">Fondo de pantalla</string>

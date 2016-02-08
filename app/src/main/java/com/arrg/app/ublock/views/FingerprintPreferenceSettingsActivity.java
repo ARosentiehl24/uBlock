@@ -108,8 +108,6 @@ public class FingerprintPreferenceSettingsActivity extends ATEActivity {
         }
     }
 
-    //arcturianos
-
     public static class FingerprintFragment extends PreferenceFragment {
 
         private CharSequence[] fingerIndexEntries;

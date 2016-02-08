@@ -21,7 +21,22 @@
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <uses-permission android:name="com.samsung.android.providers.context.permission.WRITE_USE_APP_FEATURE_SURVEY" />
 
+    <uses-permission-sdk-23 android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission-sdk-23 android:name="android.permission.GET_TOP_ACTIVITY_INFO" />
+    <uses-permission-sdk-23 android:name="android.permission.INTERNET" />
+    <uses-permission-sdk-23 android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
+    <uses-permission-sdk-23
+        android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission-sdk-23 android:name="android.permission.PROCESS_OUTGOING_CALLS" />
+    <uses-permission-sdk-23 android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission-sdk-23 android:name="android.permission.REAL_GET_TASKS" />
+    <uses-permission-sdk-23 android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission-sdk-23 android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission-sdk-23 android:name="android.permission.USE_FINGERPRINT" />
+    <uses-permission-sdk-23 android:name="android.permission.VIBRATE" />
+    <uses-permission-sdk-23 android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission-sdk-23 android:name="android.permission.WRITE_SETTINGS" />
 
     <supports-screens
         android:anyDensity="true"
@@ -62,17 +77,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity-alias>
-
-        <activity
-            android:name=".views.UBlockScreenActivity"
-            android:clearTaskOnLaunch="true"
-            android:configChanges="orientation|screenSize"
-            android:excludeFromRecents="true"
-            android:finishOnTaskLaunch="true"
-            android:hardwareAccelerated="true"
-            android:launchMode="singleTask"
-            android:screenOrientation="portrait"
-            android:theme="@style/uBlockScreenTheme" />
 
         <receiver
             android:name=".receivers.UBlockBootReceiver"

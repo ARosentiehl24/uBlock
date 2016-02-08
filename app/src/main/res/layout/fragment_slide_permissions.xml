@@ -9,7 +9,7 @@
     android:paddingRight="@dimen/activity_margin"
     android:paddingTop="@dimen/activity_margin"
     android:tag="bg_primary_color_dark"
-    tools:context=".controller.SlideSettingsFragment">
+    tools:context=".controller.SlidePermissionsFragment">
 
     <!-- TODO: Update blank fragment layout -->
     <com.arrg.app.ublock.views.uviews.UTextView
@@ -18,51 +18,27 @@
         android:layout_gravity="center_horizontal"
         android:layout_weight="1"
         android:gravity="center"
-        android:text="@string/configure_initial_settings"
+        android:text="@string/enable_permissions_request"
         android:textColor="@color/background_light"
         android:textSize="@dimen/ate_default_textsize_title" />
 
-    <TableRow
-        android:layout_width="match_parent"
+    <ImageView
+        android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:layout_gravity="center"
         android:layout_weight="3"
-        android:gravity="center">
-
-        <ImageView
-            android:layout_gravity="center"
-            android:layout_margin="2.5dp"
-            android:layout_weight="1"
-            android:contentDescription="@null"
-            android:src="@drawable/pin_1" />
-
-        <ImageView
-            android:layout_gravity="center"
-            android:layout_margin="2.5dp"
-            android:layout_weight="1"
-            android:contentDescription="@null"
-            android:src="@drawable/pattern_1" />
-    </TableRow>
+        android:contentDescription="@null"
+        android:padding="@dimen/activity_margin"
+        android:src="@drawable/pin_1" />
 
     <com.arrg.app.ublock.views.uviews.UButton
-        android:id="@+id/btn_pin"
+        android:id="@+id/btn_usageStats"
         style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="match_parent"
         android:layout_height="75dp"
         android:layout_margin="@dimen/activity_margin"
         android:background="@drawable/button_bar_style"
-        android:text="@string/title_activity_pin_settings"
+        android:text="@string/usage_stats_permission"
         android:textColor="@color/background_light"
-        android:textSize="@dimen/ate_default_textsize_title" />
-
-    <com.arrg.app.ublock.views.uviews.UButton
-        android:id="@+id/btn_pattern"
-        style="@style/Widget.AppCompat.Button.Colored"
-        android:layout_width="match_parent"
-        android:layout_height="75dp"
-        android:layout_margin="@dimen/activity_margin"
-        android:background="@drawable/button_bar_style"
-        android:text="@string/title_activity_pattern_settings"
-        android:textColor="@color/background_light"
-        android:textSize="@dimen/ate_default_textsize_title" />
+        android:textSize="@dimen/ate_default_textsize_subheading" />
 </LinearLayout>

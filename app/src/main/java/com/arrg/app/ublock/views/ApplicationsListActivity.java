@@ -17,6 +17,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -41,7 +42,6 @@ import com.arrg.app.ublock.adapters.ApplicationAdapter;
 import com.arrg.app.ublock.model.Applications;
 import com.arrg.app.ublock.util.AppUtils;
 import com.arrg.app.ublock.util.SharedPreferencesUtil;
-import com.arrg.app.ublock.util.UpdateAppUtil;
 import com.arrg.app.ublock.util.Util;
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
@@ -61,6 +61,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -70,11 +71,44 @@ import it.gmariotti.recyclerview.itemanimator.SlideInOutBottomItemAnimator;
 
 public class ApplicationsListActivity extends ATEActivity implements NavigationView.OnNavigationItemSelectedListener {
 
+    private ArrayList<Applications> applicationsArrayList;
     private ApplicationAdapter adapter;
     public static ApplicationsListActivity listActivity;
     private Boolean doubleBackToExitPressedOnce = false;
+    private Handler handler;
     private ImageFileSelector imageFileSelector;
     private ProgressDialog progress = null;
+    private Runnable refresh = new Runnable() {
+        @Override
+        public void run() {
+            swipeRefreshLayout.setRefreshing(true);
+        }
+    };
+    private Runnable removeRefresh = new Runnable() {
+        @Override
+        public void run() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    adapter = new ApplicationAdapter(ApplicationsListActivity.this, applicationsArrayList, lockedAppsPreferences, packagesAppsPreferences, settingsPreferences, preferencesUtil);
+                    adapter.registerPackageReceiver();
+
+                    AlphaAnimatorAdapter animatorAdapter = new AlphaAnimatorAdapter(adapter, rvApplications);
+                    rvApplications.setAdapter(animatorAdapter);
+                    rvApplications.setHasFixedSize(true);
+                    rvApplications.setItemAnimator(new SlideInOutBottomItemAnimator(rvApplications));
+                    rvApplications.setLayoutManager(new LinearLayoutManager(ApplicationsListActivity.this));
+
+                    YoYo.with(Techniques.ZoomOut).duration(Constants.DURATIONS_OF_ANIMATIONS).playOn(progressBar);
+                    YoYo.with(Techniques.FadeInUp).duration(Constants.DURATIONS_OF_ANIMATIONS).playOn(rvApplications);
+
+                    rvApplications.setVisibility(View.VISIBLE);
+                    swipeRefreshLayout.setRefreshing(false);
+                    swipeRefreshLayout.setEnabled(false);
+                }
+            });
+        }
+    };
     private SharedPreferences lockedAppsPreferences;
     private SharedPreferences packagesAppsPreferences;
     private SharedPreferences settingsPreferences;
@@ -91,6 +125,9 @@ public class ApplicationsListActivity extends ATEActivity implements NavigationV
 
     @Bind(R.id.rv_applications)
     RecyclerView rvApplications;
+
+    @Bind(R.id.SwipeRefreshLayout)
+    SwipeRefreshLayout swipeRefreshLayout;
 
     @Bind(R.id.toolbar)
     Toolbar toolbar;
@@ -239,6 +276,7 @@ public class ApplicationsListActivity extends ATEActivity implements NavigationV
                 } else if (id == R.id.send_bug_report) {
                     EmailIntentBuilder.from(ApplicationsListActivity.this)
                             .to(getString(R.string.support_email))
+                            .subject(String.format(getString(R.string.bug_report_subject), getString(R.string.app_name), AppUtils.getVerName(ApplicationsListActivity.this)))
                             .start();
                 }
             }
@@ -270,12 +308,8 @@ public class ApplicationsListActivity extends ATEActivity implements NavigationV
         lockedAppsPreferences = getSharedPreferences(Constants.LOCKED_APPS_PREFERENCES, Context.MODE_PRIVATE);
         packagesAppsPreferences = getSharedPreferences(Constants.PACKAGES_APPS_PREFERENCES, Context.MODE_PRIVATE);
         settingsPreferences = getSharedPreferences(Constants.SETTINGS_PREFERENCES, Context.MODE_PRIVATE);
+        handler = new Handler();
         progress = new ProgressDialog(this);
-
-        new LoadApplications().execute();
-    }
-
-    public void setupNavigationDrawer(NavigationView navigationView) {
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
@@ -284,6 +318,10 @@ public class ApplicationsListActivity extends ATEActivity implements NavigationV
             }
         }
 
+        new LoadApplications().execute();
+    }
+
+    public void setupNavigationDrawer(NavigationView navigationView) {
         if (!Util.isSamsungDevice(this) || !Util.isFingerprintEnabled(this)) {
             navigationView.getMenu().getItem(0).getSubMenu().removeItem(R.id.fingerprint_settings);
         }
@@ -376,6 +414,25 @@ public class ApplicationsListActivity extends ATEActivity implements NavigationV
         return applicationsArrayList;
     }
 
+    public ArrayList<Applications> generateData(Map<String, ?> packages) {
+        ArrayList<Applications> applicationsArrayList = new ArrayList<>();
+
+        for (Map.Entry<String, ?> entry : packages.entrySet()) {
+            try {
+                ApplicationInfo applicationInfo = getPackageManager().getApplicationInfo(entry.getKey(), 0);
+
+                if (!entry.getValue().toString().equals(getString(R.string.app_name)) && getPackageManager().getLaunchIntentForPackage(entry.getKey()) != null) {
+                    applicationsArrayList.add(new Applications(applicationInfo.loadIcon(getPackageManager()), entry.getValue().toString(), entry.getKey()));
+                    Log.d("map values", entry.getKey() + ": " + entry.getValue().toString());
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return applicationsArrayList;
+    }
+
     public List<ApplicationInfo> checkForLaunchIntent(List<ApplicationInfo> list) {
         ArrayList<ApplicationInfo> applicationInfoArrayList = new ArrayList<>();
         for (ApplicationInfo info : list) {
@@ -427,11 +484,17 @@ public class ApplicationsListActivity extends ATEActivity implements NavigationV
                         .onPositive(new MaterialDialog.SingleButtonCallback() {
                             @Override
                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                progress.setMessage(getString(R.string.please_wait_auto_update));
-                                progress.setCancelable(false);
-                                progress.show();
+                                Intent updateAppIntent = new Intent(ApplicationsListActivity.this, UpdateAppActivity.class);
 
-                                new UpdateAppUtil(ApplicationsListActivity.this).execute(url);
+                                updateAppIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+
+                                Bundle bundle = new Bundle();
+
+                                bundle.putString(getString(R.string.link_of_ublock_update), url);
+
+                                updateAppIntent.putExtras(bundle);
+
+                                Util.openInverse(ApplicationsListActivity.this, updateAppIntent, true);
                             }
                         }).negativeText(android.R.string.no)
                         .onNegative(new MaterialDialog.SingleButtonCallback() {
@@ -506,54 +569,43 @@ public class ApplicationsListActivity extends ATEActivity implements NavigationV
 
     class LoadApplications extends AsyncTask<String, String, String> {
 
-        private ArrayList<Applications> applicationsArrayList;
-
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
             progressBar.setColorSchemeColors(Config.primaryColor(ApplicationsListActivity.this, null), Config.primaryColorDark(ApplicationsListActivity.this, null));
+            handler.post(refresh);
         }
 
         @Override
         protected String doInBackground(String... params) {
             if (adapter == null) {
-                final Boolean showScrollBar = preferencesUtil.getBoolean(settingsPreferences, R.string.show_scroll_bar, R.bool.show_scroll_bar);
-
-                applicationsArrayList = generateData();
-
-                Collections.sort(applicationsArrayList, new Comparator<Applications>() {
-                    @Override
-                    public int compare(Applications lhs, Applications rhs) {
-                        return lhs.getAppName().compareTo(rhs.getAppName());
-                    }
-                });
-
-                adapter = new ApplicationAdapter(ApplicationsListActivity.this, applicationsArrayList, lockedAppsPreferences, packagesAppsPreferences, settingsPreferences, preferencesUtil);
-                adapter.registerPackageReceiver();
-
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        AlphaAnimatorAdapter animatorAdapter = new AlphaAnimatorAdapter(adapter, rvApplications);
-                        //rvApplications.addItemDecoration(new DividerItemDecoration(ApplicationsListActivity.this, DividerItemDecoration.VERTICAL_LIST));
-                        rvApplications.setAdapter(animatorAdapter);
-                        rvApplications.setHasFixedSize(true);
-                        rvApplications.setItemAnimator(new SlideInOutBottomItemAnimator(rvApplications));
-                        rvApplications.setLayoutManager(new LinearLayoutManager(ApplicationsListActivity.this));
+                        Map<String, ?> packages = packagesAppsPreferences.getAll();
+
+                        if (packages.isEmpty()) {
+                            applicationsArrayList = generateData();
+                        } else {
+                            applicationsArrayList = generateData(packages);
+                        }
+
+                        Collections.sort(applicationsArrayList, new Comparator<Applications>() {
+                            @Override
+                            public int compare(Applications lhs, Applications rhs) {
+                                return lhs.getAppName().compareTo(rhs.getAppName());
+                            }
+                        });
                     }
                 });
             }
-
             return null;
         }
 
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
-            YoYo.with(Techniques.FadeOutUp).duration(Constants.DURATIONS_OF_ANIMATIONS).playOn(progressBar);
-            YoYo.with(Techniques.FadeInUp).duration(Constants.DURATIONS_OF_ANIMATIONS).playOn(rvApplications);
-
-            rvApplications.setVisibility(View.VISIBLE);
+            handler.postDelayed(removeRefresh, 250);
         }
     }
 }

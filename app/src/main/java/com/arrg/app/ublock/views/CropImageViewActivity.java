@@ -98,25 +98,13 @@ public class CropImageViewActivity extends ATEActivity {
         seekBarRadius.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                final int seekBarProgress = progress;
+                float radius = (float) progress;
 
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                float radius = (float) seekBarProgress;
-
-                                if (seekBarProgress == 0) {
-                                    cropImageView.setImageBitmap(bitmap);
-                                } else {
-                                    cropImageView.setImageBitmap(BlurEffectUtil.blur(CropImageViewActivity.this, bitmap, radius));
-                                }
-                            }
-                        });
-                    }
-                });
+                if (progress == 0) {
+                    cropImageView.setImageBitmap(bitmap);
+                } else {
+                    cropImageView.setImageBitmap(BlurEffectUtil.blur(CropImageViewActivity.this, bitmap, radius));
+                }
             }
 
             @Override

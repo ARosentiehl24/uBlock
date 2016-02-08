@@ -6,7 +6,9 @@ package com.arrg.app.ublock.model;
 
 import android.graphics.drawable.Drawable;
 
-public class Applications {
+import java.io.Serializable;
+
+public class Applications implements Serializable {
 
     private boolean isChecked = false;
     private Drawable appIcon;

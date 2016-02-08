@@ -44,7 +44,6 @@ import com.arrg.app.ublock.util.SharedPreferencesUtil;
 import com.arrg.app.ublock.views.ApplicationsListActivity;
 import com.arrg.app.ublock.views.DialogActivity;
 import com.arrg.app.ublock.views.SplashScreenActivity;
-import com.arrg.app.ublock.views.UBlockScreenActivity;
 import com.arrg.app.ublock.views.UpdateAppActivity;
 
 import java.io.BufferedInputStream;
@@ -82,7 +81,6 @@ public class UBlockService extends Service {
     private SharedPreferences packagesAppsPreferences;
     private SharedPreferences settingsPreferences;
     private SharedPreferencesUtil preferencesUtil;
-    private String cameraOrGalleryPackage = "";
     private String close = "";
     private String lastPackageName = "";
     private String notificationMessage;
@@ -186,22 +184,16 @@ public class UBlockService extends Service {
 
     public void checkActivityOnTop(String activityOnTop) {
         if (!activityOnTop.equals("")) {
-            if (!lockedPackages.containsKey(activityOnTop)) {
-                lockedPackages.put(activityOnTop, true);
-            }
 
-            if (appIsLocked(activityOnTop) && lockedPackages.get(activityOnTop)) {
-                if (getResources().getBoolean(R.bool.lock_from_service)) {
+            if (appIsLocked(activityOnTop)) {
+                lockedPackages.put(activityOnTop, true);
+
+                if (lockedPackages.get(activityOnTop)) {
                     if (!isRunning(this, UBlockScreenService.class)) {
                         Intent uBlockIntent = new Intent(UBlockService.this, UBlockScreenService.class);
                         uBlockIntent.putExtra(getString(R.string.activityOnTop), activityOnTop);
                         startService(uBlockIntent);
                     }
-                } else {
-                    Intent uBlockIntent = new Intent(UBlockService.this, UBlockScreenActivity.class);
-                    uBlockIntent.setFlags(/*Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | */Intent.FLAG_ACTIVITY_NEW_TASK);
-                    uBlockIntent.putExtra(getString(R.string.activityOnTop), activityOnTop);
-                    startActivity(uBlockIntent);
                 }
             }
 
@@ -220,8 +212,6 @@ public class UBlockService extends Service {
 
     public void unLockApp(String activityOnTop) {
         lockedPackages.put(activityOnTop, false);
-
-
     }
 
     public void lockApp(String activityOnTop) {
@@ -573,6 +563,7 @@ public class UBlockService extends Service {
             }
 
             if (intent.getAction().equals(Intent.ACTION_PACKAGE_REMOVED)) {
+                lockedPackages.remove(appPackage);
                 preferencesUtil.deleteValue(lockedAppsPreferences, appPackage);
                 preferencesUtil.deleteValue(packagesAppsPreferences, appPackage);
             }

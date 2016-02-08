@@ -1,16 +1,12 @@
 package com.arrg.app.ublock.views;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.AssetFileDescriptor;
 import android.media.MediaPlayer;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Vibrator;
-import android.provider.Settings;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -33,7 +29,6 @@ import com.arrg.app.ublock.controller.ULinearLayoutManager;
 import com.arrg.app.ublock.services.UBlockService;
 import com.arrg.app.ublock.util.SharedPreferencesUtil;
 import com.arrg.app.ublock.util.ThemeUtil;
-import com.arrg.app.ublock.util.UsageStatsUtil;
 import com.arrg.app.ublock.util.Util;
 import com.arrg.app.ublock.views.uviews.PatternLockView;
 import com.arrg.app.ublock.views.uviews.PinLockView;
@@ -98,6 +93,7 @@ public class SplashScreenActivity extends ATEActivity {
     public static SplashScreenActivity splashScreenActivity;
     private Boolean enableFingerPrintRecognizer;
     private Boolean onReadyIdentify = false;
+    private Boolean isInStealthMode;
     private Boolean isNecessaryShowInput = true;
     private Boolean isSwipeEnabled;
     private DotsAdapter dotsAdapter;
@@ -233,6 +229,9 @@ public class SplashScreenActivity extends ATEActivity {
         }
 
         enableFingerPrintRecognizer = preferencesUtil.getBoolean(settingsPreferences, R.string.user_fingerprint, R.bool.user_fingerprint);
+        isInStealthMode = preferencesUtil.getBoolean(settingsPreferences, R.string.is_pattern_visible, R.bool.is_pattern_visible);
+        storedPin = preferencesUtil.getString(settingsPreferences, R.string.user_pin, R.string.default_code);
+
         gestureDetector = new GestureDetector(this, new CustomGestureDetector());
         vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
@@ -256,6 +255,7 @@ public class SplashScreenActivity extends ATEActivity {
     }
 
     public void setListeners() {
+        patternView.setInStealthMode(!isInStealthMode);
         patternView.setOnPatternListener(new PatternLockView.OnPatternListener() {
             String storedPattern = preferencesUtil.getString(settingsPreferences, R.string.user_pattern, R.string.default_pattern);
 
@@ -327,11 +327,7 @@ public class SplashScreenActivity extends ATEActivity {
             }
         });
 
-        checkForUsageStatsList();
-    }
-
-    public void checkForUsageStatsList() {
-        new CheckForUsageStatsList().execute();
+        startServiceIfNeeded();
     }
 
     public void playUnlockSound() {
@@ -415,6 +411,13 @@ public class SplashScreenActivity extends ATEActivity {
         }
     }
 
+    public void startServiceIfNeeded() {
+        if (!UBlockService.isRunning(SplashScreenActivity.this, UBlockService.class)) {
+            Intent i = new Intent(SplashScreenActivity.this, UBlockService.class);
+            startService(i);
+        }
+    }
+
     public void setupInputData() {
         ArrayList<ImageView> dots = new ArrayList<>();
 
@@ -430,19 +433,9 @@ public class SplashScreenActivity extends ATEActivity {
         if (isNecessaryShowInput) {
             isNecessaryShowInput = false;
 
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    SplashScreenActivity.this.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Integer lastMethodUsed = preferencesUtil.getInt(settingsPreferences, R.string.last_unlock_method, vfUnlockMethods.getDisplayedChild());
-                            vfUnlockMethods.setDisplayedChild(lastMethodUsed);
-                            displayInput(vfUnlockMethods.getCurrentView().getId());
-                        }
-                    });
-                }
-            }).start();
+            Integer lastMethodUsed = preferencesUtil.getInt(settingsPreferences, R.string.last_unlock_method, vfUnlockMethods.getDisplayedChild());
+            vfUnlockMethods.setDisplayedChild(lastMethodUsed);
+            displayInput(vfUnlockMethods.getCurrentView().getId());
         }
     }
 
@@ -455,56 +448,6 @@ public class SplashScreenActivity extends ATEActivity {
 
     public void log(String log) {
         Log.d(TAG, log);
-    }
-
-    class CheckForUsageStatsList extends AsyncTask<Void, Void, Void> {
-
-        private Boolean isInStealthMode;
-        private Boolean isEmptyUsageStatsList;
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            isInStealthMode = preferencesUtil.getBoolean(settingsPreferences, R.string.is_pattern_visible, R.bool.is_pattern_visible);
-            storedPin = preferencesUtil.getString(settingsPreferences, R.string.user_pin, R.string.default_code);
-
-            isEmptyUsageStatsList = UsageStatsUtil.getUsageStatsList(SplashScreenActivity.this).isEmpty();
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            patternView.setInStealthMode(!isInStealthMode);
-
-            if (isEmptyUsageStatsList) {
-                String dialogTitle = getString(android.R.string.dialog_alert_title);
-                String dialogMessage = getString(R.string.enable_usage_stats_message);
-
-                new AlertDialog.Builder(SplashScreenActivity.this)
-                        .setTitle(dialogTitle)
-                        .setMessage(dialogMessage)
-                        .setCancelable(false)
-                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface arg0, int arg1) {
-                                SplashScreenActivity.this.startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
-                                SplashScreenActivity.this.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                            }
-                        })
-                        .create()
-                        .show();
-            }
-
-            startServiceIfNeeded();
-        }
-
-        public void startServiceIfNeeded() {
-            if (!UBlockService.isRunning(SplashScreenActivity.this, UBlockService.class)) {
-                Intent i = new Intent(SplashScreenActivity.this, UBlockService.class);
-                startService(i);
-            }
-        }
     }
 
     class CustomGestureDetector extends GestureDetector.SimpleOnGestureListener {

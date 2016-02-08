@@ -3,7 +3,9 @@ package com.arrg.app.ublock.views;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.widget.Toast;
@@ -12,9 +14,11 @@ import com.afollestad.appthemeengine.Config;
 import com.afollestad.materialdialogs.AlertDialogWrapper;
 import com.arrg.app.ublock.Constants;
 import com.arrg.app.ublock.R;
+import com.arrg.app.ublock.controller.SlidePermissionsFragment;
 import com.arrg.app.ublock.controller.SlideSettingsFragment;
 import com.arrg.app.ublock.controller.SlideUBlockFragment;
 import com.arrg.app.ublock.util.SharedPreferencesUtil;
+import com.arrg.app.ublock.util.UsageStatsUtil;
 import com.arrg.app.ublock.util.Util;
 import com.github.paolorotolo.appintro.AppIntro2;
 
@@ -32,6 +36,7 @@ public class AppIntroActivity extends AppIntro2 {
 
         addSlide(new SlideUBlockFragment());
         addSlide(new SlideSettingsFragment());
+        addSlide(new SlidePermissionsFragment());
 
         getPager().setBackgroundColor(Config.primaryColorDark(this, null));
 
@@ -47,7 +52,13 @@ public class AppIntroActivity extends AppIntro2 {
 
     @Override
     public void onDonePressed() {
-        if (patternWasConfigured() && pinWasConfigured()) {
+        if (!patternWasConfigured() || !pinWasConfigured()) {
+            Toast.makeText(this, R.string.configure_initial_settings, Toast.LENGTH_SHORT).show();
+
+            getPager().setCurrentItem(1);
+        } else if (!userAllowDrawOverOtherApps() || !userAllowTheUsageOfStats()) {
+            Toast.makeText(this, R.string.enable_permissions_request, Toast.LENGTH_SHORT).show();
+        } else {
             new AlertDialogWrapper.Builder(this)
                     .setTitle(android.R.string.dialog_alert_title)
                     .setMessage(R.string.repeat_slides_messages)
@@ -65,8 +76,6 @@ public class AppIntroActivity extends AppIntro2 {
                             preferencesUtil.putValue(settingsPreferences, R.string.first_install, false);
                         }
                     }).show();
-        } else {
-            Toast.makeText(this, R.string.configure_initial_settings, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -86,6 +95,18 @@ public class AppIntroActivity extends AppIntro2 {
 
     public boolean pinWasConfigured() {
         return (preferencesUtil.getString(settingsPreferences, R.string.user_pin, null) != null);
+    }
+
+    public boolean userAllowTheUsageOfStats() {
+        return !UsageStatsUtil.getUsageStatsList(this).isEmpty();
+    }
+
+    public boolean userAllowDrawOverOtherApps() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            return Settings.canDrawOverlays(this);
+        } else {
+            return true;
+        }
     }
 
     public class ZoomOutPageTransformer implements ViewPager.PageTransformer {

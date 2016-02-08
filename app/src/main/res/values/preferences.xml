@@ -40,4 +40,5 @@
     <string name="user_picture">user_picture</string>
     <string name="user_picture_preference">user_picture_preference</string>
     <string name="change_background_ublock_screen">change_background_ublock_screen</string>
+    <string name="applications">applications</string>
 </resources>
