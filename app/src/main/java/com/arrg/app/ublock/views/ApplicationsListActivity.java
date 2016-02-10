@@ -90,15 +90,6 @@ public class ApplicationsListActivity extends ATEActivity implements NavigationV
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    adapter = new ApplicationAdapter(ApplicationsListActivity.this, applicationsArrayList, lockedAppsPreferences, packagesAppsPreferences, settingsPreferences, preferencesUtil);
-                    adapter.registerPackageReceiver();
-
-                    AlphaAnimatorAdapter animatorAdapter = new AlphaAnimatorAdapter(adapter, rvApplications);
-                    rvApplications.setAdapter(animatorAdapter);
-                    rvApplications.setHasFixedSize(true);
-                    rvApplications.setItemAnimator(new SlideInOutBottomItemAnimator(rvApplications));
-                    rvApplications.setLayoutManager(new LinearLayoutManager(ApplicationsListActivity.this));
-
                     YoYo.with(Techniques.ZoomOut).duration(Constants.DURATIONS_OF_ANIMATIONS).playOn(progressBar);
                     YoYo.with(Techniques.FadeInUp).duration(Constants.DURATIONS_OF_ANIMATIONS).playOn(rvApplications);
 
@@ -311,14 +302,25 @@ public class ApplicationsListActivity extends ATEActivity implements NavigationV
         handler = new Handler();
         progress = new ProgressDialog(this);
 
-        Bundle bundle = getIntent().getExtras();
-        if (bundle != null) {
-            if (bundle.getBoolean(getString(R.string.was_open_from_ublock_screen))) {
-                drawer.openDrawer(GravityCompat.START);
-            }
-        }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
 
-        new LoadApplications().execute();
+                        Bundle bundle = getIntent().getExtras();
+                        if (bundle != null) {
+                            if (bundle.getBoolean(getString(R.string.was_open_from_ublock_screen))) {
+                                drawer.openDrawer(GravityCompat.START);
+                            }
+                        }
+
+                        new LoadApplications().execute();
+                    }
+                });
+            }
+        }).start();
     }
 
     public void setupNavigationDrawer(NavigationView navigationView) {
@@ -596,6 +598,15 @@ public class ApplicationsListActivity extends ATEActivity implements NavigationV
                                 return lhs.getAppName().compareTo(rhs.getAppName());
                             }
                         });
+
+                        adapter = new ApplicationAdapter(ApplicationsListActivity.this, applicationsArrayList, lockedAppsPreferences, packagesAppsPreferences, settingsPreferences, preferencesUtil);
+                        adapter.registerPackageReceiver();
+
+                        AlphaAnimatorAdapter animatorAdapter = new AlphaAnimatorAdapter(adapter, rvApplications);
+                        rvApplications.setAdapter(animatorAdapter);
+                        rvApplications.setHasFixedSize(true);
+                        rvApplications.setItemAnimator(new SlideInOutBottomItemAnimator(rvApplications));
+                        rvApplications.setLayoutManager(new LinearLayoutManager(ApplicationsListActivity.this));
                     }
                 });
             }

@@ -15,7 +15,6 @@ import android.graphics.PixelFormat;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.media.MediaPlayer;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -73,6 +72,7 @@ import butterknife.OnTextChanged;
 public class UBlockScreenService extends Service implements View.OnKeyListener {
 
     private static final String TAG = "uBlockScreen";
+    public static UBlockScreenService uBlockScreenService;
     private Boolean enableFingerPrintRecognizer;
     private Boolean openSettings = false;
     private Boolean isNecessaryShowInput = true;
@@ -114,7 +114,7 @@ public class UBlockScreenService extends Service implements View.OnKeyListener {
                 if (openSettings) {
                     openSettings();
                 } else {
-                    services.unLockApp(mIntent.getStringExtra(getString(R.string.activityOnTop)));
+                    services.unLockApp(mIntent.getStringExtra(Constants.EXTRA_PACKAGE_NAME));
 
                     finish(false);
                 }
@@ -202,7 +202,7 @@ public class UBlockScreenService extends Service implements View.OnKeyListener {
                     openSettings = false;
 
                     try {
-                        ApplicationInfo applicationInfo = getPackageManager().getApplicationInfo(mIntent.getStringExtra(getString(R.string.activityOnTop)), 0);
+                        ApplicationInfo applicationInfo = getPackageManager().getApplicationInfo(mIntent.getStringExtra(Constants.EXTRA_PACKAGE_NAME), 0);
                         ivAppIcon.setImageDrawable(applicationInfo.loadIcon(getPackageManager()));
                         tvAppName.setText(applicationInfo.loadLabel(getPackageManager()));
                     } catch (PackageManager.NameNotFoundException e) {
@@ -233,7 +233,7 @@ public class UBlockScreenService extends Service implements View.OnKeyListener {
             if (openSettings) {
                 openSettings();
             } else {
-                services.unLockApp(mIntent.getStringExtra(getString(R.string.activityOnTop)));
+                services.unLockApp(mIntent.getStringExtra(Constants.EXTRA_PACKAGE_NAME));
                 finish(false);
             }
         }
@@ -242,6 +242,8 @@ public class UBlockScreenService extends Service implements View.OnKeyListener {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        uBlockScreenService = this;
     }
 
     @Override
@@ -261,7 +263,12 @@ public class UBlockScreenService extends Service implements View.OnKeyListener {
         recyclerView.setAdapter(dotsAdapter);
         recyclerView.setLayoutManager(new ULinearLayoutManager(this, ULinearLayoutManager.HORIZONTAL, false));
 
-        setupSharedPreferences();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                setupSharedPreferences();
+            }
+        }).start();
 
         return super.onStartCommand(intent, flags, startId);
     }
@@ -291,6 +298,14 @@ public class UBlockScreenService extends Service implements View.OnKeyListener {
         return true;
     }
 
+    public static Intent getLockIntent(Context context, String packageName) {
+        Intent uBlockIntent = new Intent(context, UBlockScreenService.class);
+        uBlockIntent.putExtra(Constants.EXTRA_PACKAGE_NAME, packageName);
+        uBlockIntent.setAction(Constants.ACTION_COMPARE);
+
+        return uBlockIntent;
+    }
+
     public void beforeInflate() {
         uBlockApplication = ((UBlockApplication) getApplicationContext()).getInstance();
 
@@ -304,6 +319,7 @@ public class UBlockScreenService extends Service implements View.OnKeyListener {
                         | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
                 PixelFormat.TRANSLUCENT);
 
+        gestureDetector = new GestureDetector(this, new CustomGestureDetector());
         mLayoutParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
     }
 
@@ -347,7 +363,9 @@ public class UBlockScreenService extends Service implements View.OnKeyListener {
             startActivity(startHomeScreen);
         }
 
-        mWindowManager.removeView(mRootView);
+        if (mRootView.getWindowToken() != null) {
+            mWindowManager.removeView(mRootView);
+        }
 
         stopSelf();
     }
@@ -356,7 +374,7 @@ public class UBlockScreenService extends Service implements View.OnKeyListener {
         preferencesUtil = new SharedPreferencesUtil(this);
         settingsPreferences = getSharedPreferences(Constants.SETTINGS_PREFERENCES, Context.MODE_PRIVATE);
 
-        new StartVariablesTask().execute();
+        configViews(mIntent.getStringExtra(Constants.EXTRA_PACKAGE_NAME));
 
         setupInitialSettings();
     }
@@ -367,7 +385,6 @@ public class UBlockScreenService extends Service implements View.OnKeyListener {
         patternView.setInStealthMode(!preferencesUtil.getBoolean(settingsPreferences, R.string.is_pattern_visible, R.bool.is_pattern_visible));
         storedPin = preferencesUtil.getString(settingsPreferences, R.string.user_pin, R.string.default_code);
 
-        gestureDetector = new GestureDetector(this, new CustomGestureDetector());
         vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
         if (!Util.isSamsungDevice(UBlockScreenService.this) || !uBlockApplication.isFingerPrintEnabled()) {
@@ -379,13 +396,9 @@ public class UBlockScreenService extends Service implements View.OnKeyListener {
             }
         }
 
-        if (isNecessaryShowInput) {
-            isNecessaryShowInput = false;
-
-            Integer lastMethodUsed = preferencesUtil.getInt(settingsPreferences, R.string.last_unlock_method, vfUnlockMethods.getDisplayedChild());
-            vfUnlockMethods.setDisplayedChild(lastMethodUsed);
-            displayInput(vfUnlockMethods.getCurrentView().getId());
-        }
+        Integer lastMethodUsed = preferencesUtil.getInt(settingsPreferences, R.string.last_unlock_method, vfUnlockMethods.getDisplayedChild());
+        vfUnlockMethods.setDisplayedChild(lastMethodUsed);
+        displayInput(vfUnlockMethods.getCurrentView().getId());
 
         setListeners();
     }
@@ -406,7 +419,7 @@ public class UBlockScreenService extends Service implements View.OnKeyListener {
                     if (openSettings) {
                         openSettings();
                     } else {
-                        services.unLockApp(mIntent.getStringExtra(getString(R.string.activityOnTop)));
+                        services.unLockApp(mIntent.getStringExtra(Constants.EXTRA_PACKAGE_NAME));
 
                         finish(false);
                     }
@@ -445,7 +458,7 @@ public class UBlockScreenService extends Service implements View.OnKeyListener {
                         if (openSettings) {
                             openSettings();
                         } else {
-                            services.unLockApp(mIntent.getStringExtra(getString(R.string.activityOnTop)));
+                            services.unLockApp(mIntent.getStringExtra(Constants.EXTRA_PACKAGE_NAME));
 
                             finish(false);
                         }
@@ -594,65 +607,60 @@ public class UBlockScreenService extends Service implements View.OnKeyListener {
         HIDDEN
     }
 
-    class StartVariablesTask extends AsyncTask<Void, Void, Void> {
 
-        @Override
-        protected Void doInBackground(Void... params) {
-            configViews();
+    public void configViews(String packageName) {
+        try {
+            ApplicationInfo applicationInfo = getPackageManager().getApplicationInfo(packageName, 0);
+            ivAppIcon.setImageDrawable(applicationInfo.loadIcon(getPackageManager()));
+            tvAppName.setText(applicationInfo.loadLabel(getPackageManager()));
 
-            return null;
+            applyTheme();
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
         }
+    }
 
-        public void configViews() {
-            try {
-                ApplicationInfo applicationInfo = getPackageManager().getApplicationInfo(mIntent.getStringExtra(getString(R.string.activityOnTop)), 0);
-                ivAppIcon.setImageDrawable(applicationInfo.loadIcon(getPackageManager()));
-                tvAppName.setText(applicationInfo.loadLabel(getPackageManager()));
+    public void applyTheme() {
+        if (preferencesUtil.getBoolean(settingsPreferences, R.string.change_background_ublock_screen, false)) {
+            Palette.from(((BitmapDrawable) ivAppIcon.getDrawable()).getBitmap()).generate(new Palette.PaletteAsyncListener() {
+                public void onGenerated(Palette palette) {
+                    Integer iconColor = palette.getVibrantColor(Config.primaryColor(UBlockScreenService.this, null));
 
-                applyTheme();
-            } catch (PackageManager.NameNotFoundException e) {
-                e.printStackTrace();
-            }
-        }
-
-        public void applyTheme() {
-            if (preferencesUtil.getBoolean(settingsPreferences, R.string.change_background_ublock_screen, false)) {
-                Palette.from(((BitmapDrawable) ivAppIcon.getDrawable()).getBitmap()).generate(new Palette.PaletteAsyncListener() {
-                    public void onGenerated(Palette palette) {
-                        Integer iconColor = palette.getVibrantColor(Config.primaryColor(UBlockScreenService.this, null));
-
-                        fabFingerprint.setBackgroundTintList(ColorStateList.valueOf(iconColor));
-
-                        container.setBackground(new ColorDrawable(CircleView.shiftColorDown(iconColor)));
-
-                        ThemeUtil.applyTheme(iconColor, cvEtPin, cvFingerprint, cvPattern, cvPin);
+                    if (iconColor == Config.primaryColor(UBlockScreenService.this, null)) {
+                        iconColor = palette.getMutedColor(Config.primaryColor(UBlockScreenService.this, null));
                     }
-                });
-            } else {
-                if (preferencesUtil.getString(settingsPreferences, R.string.background, null) != null) {
-                    Integer glassColor = ContextCompat.getColor(UBlockScreenService.this, R.color.glass_25);
 
-                    cvEtPin.setCardElevation(0);
-                    cvFingerprint.setCardElevation(0);
-                    cvPattern.setCardElevation(0);
-                    cvPin.setCardElevation(0);
+                    fabFingerprint.setBackgroundTintList(ColorStateList.valueOf(iconColor));
 
-                    fabFingerprint.setBackgroundTintList(ColorStateList.valueOf(glassColor));
-                    fabFingerprint.setElevation(0);
-                    fabFingerprint.setTag("");
+                    container.setBackground(new ColorDrawable(CircleView.shiftColorDown(iconColor)));
 
-                    String chosenWallpaper = preferencesUtil.getString(settingsPreferences, R.string.background, null);
-
-                    Bitmap bitmap = BitmapFactory.decodeFile(chosenWallpaper);
-
-                    container.setBackground(new BitmapDrawable(getResources(), bitmap));
-
-                    ThemeUtil.applyTheme(glassColor, cvEtPin, cvFingerprint, cvPattern, cvPin);
-                } else {
-                    container.setBackground(new ColorDrawable(Config.primaryColorDark(UBlockScreenService.this, null)));
-
-                    ThemeUtil.applyTheme(Config.primaryColor(UBlockScreenService.this, null), cvEtPin, cvFingerprint, cvPattern, cvPin);
+                    ThemeUtil.applyTheme(iconColor, cvEtPin, cvFingerprint, cvPattern, cvPin);
                 }
+            });
+        } else {
+            if (preferencesUtil.getString(settingsPreferences, R.string.background, null) != null) {
+                Integer glassColor = ContextCompat.getColor(UBlockScreenService.this, R.color.glass_25);
+
+                cvEtPin.setCardElevation(0);
+                cvFingerprint.setCardElevation(0);
+                cvPattern.setCardElevation(0);
+                cvPin.setCardElevation(0);
+
+                fabFingerprint.setBackgroundTintList(ColorStateList.valueOf(glassColor));
+                fabFingerprint.setElevation(0);
+                fabFingerprint.setTag("");
+
+                String chosenWallpaper = preferencesUtil.getString(settingsPreferences, R.string.background, null);
+
+                Bitmap bitmap = BitmapFactory.decodeFile(chosenWallpaper);
+
+                container.setBackground(new BitmapDrawable(getResources(), bitmap));
+
+                ThemeUtil.applyTheme(glassColor, cvEtPin, cvFingerprint, cvPattern, cvPin);
+            } else {
+                container.setBackground(new ColorDrawable(Config.primaryColorDark(UBlockScreenService.this, null)));
+
+                ThemeUtil.applyTheme(Config.primaryColor(UBlockScreenService.this, null), cvEtPin, cvFingerprint, cvPattern, cvPin);
             }
         }
     }

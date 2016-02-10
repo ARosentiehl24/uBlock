@@ -81,7 +81,6 @@ public class UBlockService extends Service {
     private SharedPreferences packagesAppsPreferences;
     private SharedPreferences settingsPreferences;
     private SharedPreferencesUtil preferencesUtil;
-    private String close = "";
     private String lastPackageName = "";
     private String notificationMessage;
     private String notificationTitle;
@@ -184,39 +183,59 @@ public class UBlockService extends Service {
 
     public void checkActivityOnTop(String activityOnTop) {
         if (!activityOnTop.equals("")) {
+            if (!activityOnTop.equals(lastPackageName)) {
 
-            if (appIsLocked(activityOnTop)) {
-                lockedPackages.put(activityOnTop, true);
+                Boolean appIsLocked = appIsLocked(activityOnTop);
 
-                if (lockedPackages.get(activityOnTop)) {
-                    if (!isRunning(this, UBlockScreenService.class)) {
-                        Intent uBlockIntent = new Intent(UBlockService.this, UBlockScreenService.class);
-                        uBlockIntent.putExtra(getString(R.string.activityOnTop), activityOnTop);
+                String close = lastPackageName;
+
+                lockApp(lastPackageName);
+
+                Log.d("TopActivity", "Close: " + close + " -> Open: " + activityOnTop);
+
+                if (appIsLocked) {
+                    if (!lockedPackages.containsKey(activityOnTop)) {
+                        lockedPackages.put(activityOnTop, true);
+
+                        Log.d("TopActivity", "Added: " + activityOnTop + " Size: " + lockedPackages.size());
+                    }
+
+                    if (lockedPackages.containsKey(close) && lockedPackages.get(close) && lockedPackages.containsKey(activityOnTop) && lockedPackages.get(activityOnTop)) {
+                        UBlockScreenService.uBlockScreenService.configViews(activityOnTop);
+
+                        Log.d("TopActivity", "Replace View: " + close + " to " + activityOnTop);
+                    } else if (lockedPackages.containsKey(activityOnTop) && lockedPackages.get(activityOnTop)) {
+                        Intent uBlockIntent = new Intent(this, UBlockScreenService.class);
+                        uBlockIntent.putExtra(Constants.EXTRA_PACKAGE_NAME, activityOnTop);
+                        uBlockIntent.setAction(Constants.ACTION_COMPARE);
                         startService(uBlockIntent);
+                    }
+                } else {
+                    if (lockedPackages.containsKey(close) && lockedPackages.get(close)) {
+                        UBlockScreenService.uBlockScreenService.finish(false);
+
+                        Log.d("TopActivity", "Hide View: " + close + " to " + activityOnTop);
                     }
                 }
             }
 
-            if (!activityOnTop.equals(lastPackageName) && !activityOnTop.equals("com.google.android.googlequicksearchbox")) {
-                close = lastPackageName;
-                lockApp(lastPackageName);
-
-                Log.d("TopActivity", "Close: " + close + " -> Open: " + activityOnTop);
-            }
+            //Log.d("Top", lastPackageName + " vs " + activityOnTop);
 
             lastPackageName = activityOnTop;
-
-            //Log.d("TopActivity", activityOnTop);
         }
     }
 
     public void unLockApp(String activityOnTop) {
+        Log.d("TopActivity", "UnLocking " + activityOnTop);
         lockedPackages.put(activityOnTop, false);
     }
 
     public void lockApp(String activityOnTop) {
         if (!lockAfterScreenOff()) {
-            lockedPackages.put(activityOnTop, true);
+            if (lockedPackages.containsKey(activityOnTop)) {
+                Log.d("TopActivity", "Locking " + activityOnTop);
+                lockedPackages.put(activityOnTop, true);
+            }
         }
     }
 
@@ -234,7 +253,7 @@ public class UBlockService extends Service {
 
             long time = System.currentTimeMillis();
 
-            List<UsageStats> stats = mUsageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, time - 1000 * 5, time);
+            List<UsageStats> stats = mUsageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, (long) (time - 1000 * 2.5), time);
 
             if (stats != null) {
                 SortedMap<Long, UsageStats> mySortedMap = new TreeMap<>();
@@ -529,7 +548,7 @@ public class UBlockService extends Service {
         public void run() {
             try {
                 UBlockService.this.checkRunningApps();
-                handler.postDelayed(mMonitorRunnable, 250);
+                handler.postDelayed(mMonitorRunnable, 100);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -649,6 +668,7 @@ public class UBlockService extends Service {
         public void lockAllApps() {
             for (Map.Entry<String, Boolean> entry : lockedPackages.entrySet()) {
                 entry.setValue(true);
+                Log.d("TopActivity", "Package: " + entry.getKey());
             }
         }
     }
